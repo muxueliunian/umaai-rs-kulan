@@ -1,0 +1,336 @@
+use std::{collections::BTreeMap, sync::OnceLock};
+
+use anyhow::{Result, anyhow};
+use log::info;
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
+
+use crate::{
+    explain::Explain,
+    game::TurnStage,
+    utils::{Array5, Array6}
+};
+
+/// 自由比赛区间数据
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FreeRaceData {
+    /// 开始回合(从0开始)
+    pub start_turn: u32,
+    // 结束回合
+    pub end_turn: u32,
+    /// 比赛次数
+    pub count: u32
+}
+
+/// 马娘数据 UmaDB.json
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UmaData {
+    /// 马娘ID
+    pub game_id: u32,
+    /// 星数
+    pub star: u32,
+    /// 名字
+    pub name: String,
+    /// 五维加成
+    pub five_status_bonus: Array5,
+    /// 初始五维
+    pub five_status_initial: Array5,
+    /// 比赛回合
+    pub races: Vec<u32>,
+    /// 自由比赛回合
+    pub free_races: Vec<FreeRaceData>
+}
+
+impl UmaData {
+    pub fn short_name(&self) -> &str {
+        self.name.split("]").last().unwrap_or(&self.name)
+    }
+}
+/// 支援卡数据 CardDB.json
+/// 支援卡具体数值
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CardValue {
+    /// 友情
+    #[serde(default, rename = "youQing")]
+    pub youqing: f32,
+    /// 干劲
+    #[serde(default, rename = "ganJing")]
+    pub ganjing: i32,
+    /// 训练
+    #[serde(default, rename = "xunLian")]
+    pub xunlian: i32,
+    /// 赛后
+    #[serde(default, rename = "saiHou")]
+    pub saihou: i32,
+    /// 得意率
+    #[serde(default, rename = "deYiLv")]
+    pub deyilv: f32,
+    /// 初始羁绊
+    #[serde(default, rename = "initialJiBan")]
+    pub initial_jiban: i32,
+    /// 启发等级
+    #[serde(default)]
+    pub hint_level: i32,
+    /// 启发概率
+    #[serde(default)]
+    pub hint_prob_increase: i32,
+    /// 智训练体力恢复
+    #[serde(default)]
+    pub wiz_vital_bonus: i32,
+    /// 失败率下降
+    #[serde(default)]
+    pub fail_rate_drop: f32,
+    /// 体力消耗降低
+    #[serde(default)]
+    pub vital_cost_drop: f32,
+    /// 事件效果提高
+    #[serde(default)]
+    pub event_effect_up: i32,
+    /// 事件回复量提高
+    #[serde(default)]
+    pub event_recovery_amount_up: i32,
+    /// 副属性
+    pub bonus: Array6,
+    /// 初始属性
+    pub initial_bonus: Array6,
+    /// 启发收益
+    pub hint_bonus: Array6
+}
+
+/// 支援卡数据 CardDB.json
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SupportCardData {
+    /// 支援卡ID
+    pub card_id: u32,
+    /// 角色ID
+    pub chara_id: u32,
+    /// 卡名
+    pub card_name: String,
+    /// 全名
+    pub full_name: String,
+    /// 稀有度，123
+    pub rarity: u32,
+    /// 卡类型 0速1耐2力3根4智5团队6友人
+    pub card_type: i32,
+    /// 数值
+    pub card_value: Vec<CardValue>,
+    /// 固有类型
+    #[serde(default)]
+    pub unique_effect_type: u32,
+    /// 固有描述
+    pub unique_effect_summary: Option<String>,
+    /// 固有数值
+    #[serde(default)]
+    pub unique_effect_param: Vec<i32>
+}
+
+impl SupportCardData {
+    pub fn short_name(&self) -> String {
+        let parts: Vec<_> = self.card_name.split(']').collect();
+        let left = parts[0];
+        let right_short: String = parts[1].chars().take(2).collect();
+        format!("{left}]{right_short}")
+    }
+}
+
+/// 训练或事件数值
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct ActionValue {
+    /// 基础属性
+    pub status_pt: Array6,
+    /// 体力
+    pub vital: i32,
+    /// 干劲
+    pub motivation: i32,
+    /// Hint等级
+    pub hint_level: i32
+}
+
+impl ActionValue {
+    pub fn explain(&self) -> String {
+        let mut s = Explain::status_with_pt(&self.status_pt);
+        if self.vital != 0 {
+            s += &format!(" 体力{}", self.vital);
+        }
+        if self.motivation != 0 {
+            s += &format!(" 干劲{}", self.motivation);
+        }
+        if self.hint_level != 0 {
+            s += &format!(" Hint+{}", self.hint_level);
+        }
+        s
+    }
+}
+
+/// 剧本事件信息，也用于临时生成一些固定事件如赛后
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct EventData {
+    /// ID, 必须不同, 游戏内ID为9位数，自定义的位数更少
+    pub id: u32,
+    /// 名字
+    pub name: String,
+    /// 可以触发的开始回合
+    pub start_turn: u32,
+    /// 结束回合, 不包含
+    pub end_turn: u32,
+    /// 触发阶段
+    pub trigger_stage: TurnStage,
+    /// 概率, 100为必发
+    pub trigger_prob: i32,
+    /// 最大触发次数, 0为无限
+    pub max_trigger_time: u32,
+    /// 属性奖励(随机改为平均) 速耐力根智pt，体力
+    pub bonus: ActionValue
+}
+
+/// 剧本状态
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ScenarioData {
+    /// 剧本ID
+    pub scenario_id: u32,
+    /// 最大回合数
+    pub max_turn: u32,
+    /// 剧本事件
+    pub story_events: Vec<EventData>,
+    /// 链接角色 chara_id
+    pub link_charas: Vec<u32>
+}
+
+#[derive(Clone, Debug)]
+pub struct GameData {
+    pub uma: BTreeMap<String, UmaData>,
+    pub card: BTreeMap<String, SupportCardData>,
+    pub text: BTreeMap<String, BTreeMap<String, String>>
+}
+
+pub fn load_json<T: DeserializeOwned>(path: &str) -> Result<T> {
+    info!("载入数据 {path}");
+    Ok(serde_json::from_str(&fs_err::read_to_string(path)?)?)
+}
+
+impl GameData {
+    pub fn load() -> Result<Self> {
+        let uma: BTreeMap<_, _> = load_json("gamedata/umaDB.json")?;
+        let card: BTreeMap<_, _> = load_json("gamedata/cardDB.json")?;
+        let text = load_json("gamedata/text_data_dict.json")?;
+        info!("载入 {} 马娘, {} 支援卡", uma.len(), card.len());
+        Ok(Self { uma, card, text })
+    }
+
+    pub fn get_uma(&self, id: u32) -> Result<&UmaData> {
+        self.uma
+            .get(&id.to_string())
+            .ok_or_else(|| anyhow!("未找到 id={id} 的马娘，需要更新数据"))
+    }
+
+    pub fn get_card(&self, id: u32) -> Result<&SupportCardData> {
+        self.card
+            .get(&id.to_string())
+            .ok_or(anyhow!("未找到 id={id} 的支援卡，需要更新数据"))
+    }
+
+    pub fn get_chara_name(&self, chara_id: u32) -> &str {
+        self.text["6"]
+            .get(&chara_id.to_string())
+            .map(|x| x.as_str())
+            .unwrap_or("未知")
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct GameConstants {
+    /// 训练基础值 训练类型 等级 速耐力根智pt体力
+    pub training_basic_value: Vec<Vec<Vec<i32>>>,
+    /// 基础属性上限, 1200不减半
+    pub five_status_limit_base: [i32; 5],
+    /// 训练会失败的体力阈值，拟合的
+    pub training_vital_threshold: Vec<Vec<f32>>,
+    // 友人相关
+    /// 友人羁绊<60, >=60时出门概率
+    pub friend_unlock_prob: [f32; 2],
+    /// 点击友人出现率
+    pub friend_event_prob: f32,
+    /// 团队卡Buff解除概率
+    pub group_buff_end_prob: Vec<f32>,
+    // 评分相关
+    /// 每pt对应分数
+    pub pt_score_rate: f32,
+    /// 每级hint对应的pt
+    pub hint_pt_rate: f32,
+    /// 每点属性对应的评分 ~2000(翻倍2800)
+    pub five_status_final_score: Vec<i32>,
+    /// 评价档次
+    pub rank_scores: Vec<i32>,
+    /// 评价名字
+    pub rank_names: Vec<String>
+}
+
+impl GameConstants {
+    pub fn load() -> Result<Self> {
+        info!("载入游戏数据");
+        load_json("gamedata/constants.json")
+    }
+
+    pub fn get_rank_name(&self, score: i32) -> String {
+        self.rank_scores
+            .iter()
+            .enumerate()
+            .find_map(|(i, x)| {
+                if score.max(0) < *x {
+                    Some(self.rank_names[i - 1].clone())
+                } else {
+                    None
+                }
+            })
+            .unwrap_or("US9".to_string())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use anyhow::Result;
+
+    use super::*;
+    use crate::utils::{init_logger, make_table};
+
+    #[test]
+    fn test_uma_data() -> Result<()> {
+        let uma_data: HashMap<String, UmaData> = serde_json::from_str(&fs_err::read_to_string("gamedata/umaDB.json")?)?;
+        let umas: Vec<_> = uma_data.values().take(10).collect();
+        println!("{}", make_table(&umas)?);
+        Ok(())
+    }
+
+    #[test]
+    fn test_support_data() -> Result<()> {
+        let support_data: HashMap<String, SupportCardData> =
+            serde_json::from_str(&fs_err::read_to_string("gamedata/cardDB.json")?)?;
+        let cards: Vec<_> = support_data.values().skip(300).take(10).collect();
+        println!("{:#?}", cards);
+        Ok(())
+    }
+
+    #[test]
+    fn test_consts() -> Result<()> {
+        init_logger()?;
+        let consts = GameConstants::load()?;
+        println!("{:?}", consts);
+
+        println!("{}", consts.get_rank_name(63399));
+        Ok(())
+    }
+}
+
+pub static GAMEDATA: OnceLock<GameData> = OnceLock::new();
+pub static GAMECONSTANTS: OnceLock<GameConstants> = OnceLock::new();
+
+pub fn init_global() -> Result<()> {
+    GAMEDATA.set(GameData::load()?).expect("global gamedata");
+    GAMECONSTANTS.set(GameConstants::load()?).expect("global constants");
+    Ok(())
+}
