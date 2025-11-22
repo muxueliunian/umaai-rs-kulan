@@ -1,9 +1,11 @@
 use std::io::Write;
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use comfy_table::Table;
 use env_logger::Builder;
 use serde::Serialize;
+
+use crate::gamedata::{EventCollection, EventData, GAMECONSTANTS, GAMEDATA};
 
 pub type Array5 = [i32; 5];
 pub type Array6 = [i32; 6];
@@ -57,6 +59,25 @@ macro_rules! global {
     ($name:ident) => {
         $name.get().expect(concat!(stringify!($name), " not initialized"))
     };
+}
+
+pub fn global_events() -> &'static EventCollection {
+    &global!(GAMEDATA).events
+}
+/// 获得events.json里记载的指定system事件
+pub fn system_event(key: &str) -> Result<&'static EventData> {
+    global_events()
+        .system_events
+        .get(key)
+        .ok_or(anyhow!("未知系统事件: {key}"))
+}
+/// 获得constants.json里记载的指定事件概率
+pub fn system_event_prob(key: &str) -> Result<f64> {
+    global!(GAMECONSTANTS)
+        .event_probs
+        .get(key)
+        .map(|x| *x as f64)
+        .ok_or(anyhow!("未知事件概率: {key}"))
 }
 
 pub trait AttributeArray {

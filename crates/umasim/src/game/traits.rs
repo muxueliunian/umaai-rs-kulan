@@ -8,7 +8,7 @@ use rand_distr::{Distribution, weighted::WeightedIndex};
 
 use super::PersonType;
 use crate::{
-    game::{CardTrainingEffect, SupportCard, Uma},
+    game::{BaseAction, CardTrainingEffect, SupportCard, Uma},
     gamedata::{ActionValue, EventData, GAMECONSTANTS},
     global,
     utils::Array5
@@ -32,19 +32,35 @@ pub trait Person: Debug + Clone + PartialEq + Default {
     /// friendship getter
     fn friendship(&self) -> i32;
 
+    /// hint getter
+    fn hint(&self) -> bool;
+
+    /// hint setter
+    fn set_hint(&mut self, hint: bool);
+
     /// provided: 是否为友人，团队，记者或者理事长
     fn is_friend(&self) -> bool {
         self.train_type() > 4 || matches!(self.person_type(), PersonType::Reporter | PersonType::Yayoi)
     }
+
+    /// 是否为剧本友人
+    fn is_scenario_card(&self) -> bool {
+        self.person_type() == PersonType::ScenarioCard
+    }
 }
 
 /// 会改变Game状态的主动选项
-pub trait ActionEnum: Debug {
+pub trait ActionEnum: Debug + Clone {
     /// 操作的对象类型，不一定要实现Game Trait
     type Game;
 
     /// visitor，调用具体动作
     fn apply(&self, game: &mut Self::Game, rng: &mut StdRng) -> Result<()>;
+
+    /// 尝试转变为BaseAction以获取基础行动类型
+    fn as_base_action(&self) -> Option<BaseAction> {
+        None
+    }
 }
 
 /// 游戏状态类型需要实现的Trait，不包括初始化
@@ -61,7 +77,7 @@ pub trait Game: Clone {
     /// 模拟当前Stage
     fn run_stage<T: Trainer<Self>>(&mut self, trainer: &T, rng: &mut StdRng) -> Result<()>;
     /// provided: 模拟到游戏结束
-    fn run_simulate<T: Trainer<Self>>(&mut self, trainer: &T, rng: &mut StdRng) -> Result<()> {
+    fn run_full_game<T: Trainer<Self>>(&mut self, trainer: &T, rng: &mut StdRng) -> Result<()> {
         self.run_stage(trainer, rng)?;
         while self.next() {
             self.run_stage(trainer, rng)?;
@@ -69,28 +85,30 @@ pub trait Game: Clone {
         Ok(())
     }
     // 动作相关
-    /// events getter
-    fn events(&self) -> &HashMap<u32, u32>;
-    /// events mut
-    fn event_mut(&mut self) -> &mut HashMap<u32, u32>;
     /// 获取当前可能的可控行动
     fn list_actions(&self) -> Result<Vec<Self::Action>>;
-    /// 获取当前可能发动的事件
-    fn list_events(&self) -> Vec<EventData>;
-    /// provided: 执行指定事件
-    fn apply_event(&mut self, event: &EventData, rng: &mut StdRng) -> Result<&mut Self> {
-        let roll = rng.random_range(0..100);
-        if event.trigger_prob >= 100 || roll < event.trigger_prob {
-            info!(
-                "+事件#{} {} [roll {}<{}]",
-                event.id, event.name, roll, event.trigger_prob
-            );
-            // 记录触发
-            self.event_mut().entry(event.id).and_modify(|x| *x += 1).or_insert(1);
-            // 增加效果
-            self.uma_mut().apply_action(&event.bonus);
+    /// 生成当前回合的事件
+    fn generate_events(&self, rng: &mut StdRng) -> Vec<EventData>;
+    /// 应用事件效果，一些特殊事件需要用到rng和Result
+    fn apply_event(&mut self, event: &EventData, choice: usize, rng: &mut StdRng) -> Result<()>;
+    /// 执行事件，如果有选项，交给Trainer去决定
+    fn run_event<T: Trainer<Self>>(&mut self, event: &EventData, trainer: &T, rng: &mut StdRng) -> Result<()> {
+        if event.choices.len() > 1 {
+            let selection = if let Some(probs) = &event.random_choice_prob {
+                // 随机选择选项
+                let weights = WeightedIndex::new(probs)?;
+                weights.sample(rng)
+            } else {
+                // 训练员选择选项
+                for (index, choice) in event.choices.iter().enumerate() {
+                    info!("选项 {}: {}", index + 1, choice.explain());
+                }
+                trainer.select_choice(self, &event.choices, rng)?
+            };
+            self.apply_event(&event, selection, rng)
+        } else {
+            self.apply_event(&event, 0, rng)
         }
-        Ok(self)
     }
     /// provided: 执行指定动作
     fn apply_action(&mut self, action: &Self::Action, rng: &mut StdRng) -> Result<()> {
@@ -99,20 +117,30 @@ pub trait Game: Clone {
     // 人头分配相关
     /// persons getter
     fn persons(&self) -> &[Self::Person];
+    /// persons mut
+    fn persons_mut(&mut self) -> &mut [Self::Person];
     /// 初始化人头
     fn init_persons(&mut self) -> Result<()>;
+    /// 已经初始化的人头是否能出现在训练（如记者）
+    fn person_is_available(&self, person_index: usize) -> bool {
+        match self.persons()[person_index].person_type() {
+            PersonType::ScenarioCard => self.turn() >= 2,
+            PersonType::Reporter => self.turn() >= 13,
+            _ => true
+        }
+    }
     /// distribution getter
     fn distribution(&self) -> &Vec<Vec<i32>>;
     /// distribution mut
     fn distribution_mut(&mut self) -> &mut Vec<Vec<i32>>;
     /// absent_rate_drop getter
     fn absent_rate_drop(&self) -> i32;
-    /// 计算得意率
-    fn deyilv(&self, person_index: i32) -> Result<f32>;
+    /// 计算得意率，同时修改卡片计算状态所以要mut
+    fn deyilv(&mut self, person_index: i32) -> Result<f32>;
     /// 团队卡是否可以闪彩，不考虑多个团卡的情况
     fn has_group_buff(&self) -> bool;
     /// 显示分布信息
-    fn explain_distribution(&self) -> String;
+    fn explain_distribution(&self) -> Result<String>;
     /// 重置分布
     fn reset_distribution(&mut self) {
         self.distribution_mut().clear();
@@ -123,7 +151,7 @@ pub trait Game: Clone {
     /// 追加分配一个在persons里已经存在的人头, -1为不在
     /// 如果要新加角色 需要手动添加到persons里
     fn distribute_person(&mut self, person_index: i32, allow_absent: bool, rng: &mut StdRng) -> Result<i32> {
-        let person = &self.persons()[person_index as usize];
+        let person = self.persons()[person_index as usize].clone();
         let train_type = person.train_type() as usize;
         // 计算不在率
         let mut absent_rate = match person.person_type() {
@@ -185,9 +213,25 @@ pub trait Game: Clone {
         self.reset_distribution();
         for ty in sequence {
             for i in 0..self.persons().len() {
-                if self.persons()[i].person_type() == ty {
+                if self.persons()[i].person_type() == ty && self.person_is_available(i) {
                     self.distribute_person(i as i32, true, rng)?;
                 }
+            }
+        }
+        Ok(())
+    }
+    /// 分配Hint. 注意同一个卡的不同分身会同时触发Hint
+    fn distribute_hint(&mut self, rng: &mut StdRng) -> Result<()> {
+        let base_hint_rate = global!(GAMECONSTANTS).base_hint_rate / 100.0;
+        let hint_probs: Vec<_> = self
+            .deck()
+            .iter()
+            .map(|card| card.card_value().expect("card_value").hint_prob_increase)
+            .collect();
+        for person in self.persons_mut() {
+            if person.person_type() == PersonType::Card {
+                let hint_prob = base_hint_rate * ((100 + hint_probs[person.person_index() as usize]) as f32 / 100.0);
+                person.set_hint(rng.random_bool(hint_prob as f64));
             }
         }
         Ok(())
@@ -235,7 +279,7 @@ pub trait Game: Clone {
         for index in &self.distribution()[train] {
             if *index < 6 {
                 let card = &self.deck()[*index as usize];
-                let mut effect = card.effect.clone();
+                let (mut effect, _) = card.calc_training_effect(self, train as i32)?;
                 if !self.is_shining_at(*index as usize, train) {
                     effect.youqing = 0.0;
                 }
@@ -247,7 +291,7 @@ pub trait Game: Clone {
     /// provided: 计算训练属性
     fn calc_training_value(&self, buffs: &CardTrainingEffect, train: usize) -> Result<ActionValue> {
         let cons = global!(GAMECONSTANTS);
-        let train_level = self.train_level(train);
+        let train_level = self.train_level(train) - 1; // 返回1-5处理成0-4
         if train >= 5 {
             return Err(anyhow!("训练类型错误: {train}"));
         }
@@ -260,7 +304,8 @@ pub trait Game: Clone {
         let basic_value = &cons.training_basic_value[train][train_level];
         let basic_motivation = ((self.uma().motivation - 3) * 10) as f32;
         // 成长率
-        let status_bonus = &self.uma().five_status_bonus;
+        let mut status_bonus = self.uma().five_status_bonus.to_vec();
+        status_bonus.push(0); // pt增长率为0
         let mut ret = ActionValue::default();
         // 副属性
         for i in 0..6 {
@@ -272,28 +317,57 @@ pub trait Game: Clone {
         // 直接计算。假设buffs里已经算好中间加成
         for i in 0..6 {
             if basic_value[i] > 0 {
-                ret.status_pt[i] = (ret.status_pt[i] as f32
+                let real_value = ret.status_pt[i] as f32
                     * (1.0 + 0.01 * buffs.youqing as f32)
                     * (1.0 + 0.01 * basic_motivation * (1.0 + 0.01 * buffs.ganjing as f32))
                     * (1.0 + 0.01 * buffs.xunlian as f32)
                     * (1.0 + 0.05 * person_count as f32)
-                    * (1.0 + 0.01 * status_bonus[i] as f32))
-                    .floor() as i32;
+                    * (1.0 + 0.01 * status_bonus[i] as f32);
+                ret.status_pt[i] = real_value.floor() as i32;
+                //warn!("Train: {train}, i: {i}, real: {real_value}, ret: {}", ret.status_pt[i]);
             }
         }
         // 智力回体
-        if train == 4 {
+        if train == 4 && buffs.youqing > 0.0 {
             ret.vital += buffs.wiz_vital_bonus;
         }
         // 体力消耗降低
         if ret.vital < 0 {
             ret.vital = (ret.vital as f32 * (1.0 - 0.01 * buffs.vital_cost_drop)) as i32;
         }
+        //warn!("Train: {train}, buffs: {}, basic_value: {basic_value:?}, status_bonus: {status_bonus:?}, ret: {ret:?}", buffs.explain());
         Ok(ret)
+    }
+
+    // 粗略拟合的训练失败率，二次函数 A*(x0-x)^2+B*(x0-x)
+    fn calc_training_failure_rate(&self, buffs: &CardTrainingEffect, train: usize) -> f32 {
+        let x0 = global!(GAMECONSTANTS).training_vital_threshold[train][self.train_level(train) - 1];
+        let vital = self.uma().vital as f32;
+        // 失败率修正
+        let bias = if self.uma().flags.good_trainer {
+            -2.0
+        } else if self.uma().flags.bad_trainer {
+            2.0
+        } else {
+            0.0
+        };
+        // 原始失败率最大99%
+        let mut f = if vital < x0 {
+            (100.0 - vital) * (x0 - vital) / 40.0
+        } else {
+            0.0
+        }
+        .min(99.0)
+        .max(0.0);
+        // 如果有不擅长练习，失败率可能达到100%
+        f = (f * (100.0 - buffs.fail_rate_drop) / 100.0 + bias).min(100.0).max(0.0);
+        f
     }
 }
 
 pub trait Trainer<G: Game> {
-    /// 根据当前局面选择动作
+    /// 选择动作
     fn select_action(&self, game: &G, actions: &[<G as Game>::Action], rng: &mut StdRng) -> Result<usize>;
+    /// 选择事件选项
+    fn select_choice(&self, game: &G, choices: &[ActionValue], rng: &mut StdRng) -> Result<usize>;
 }

@@ -1,12 +1,14 @@
 use std::{collections::BTreeMap, sync::OnceLock};
 
 use anyhow::{Result, anyhow};
+use hashbrown::HashMap;
 use log::info;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
 use crate::{
     explain::Explain,
     game::TurnStage,
+    global,
     utils::{Array5, Array6}
 };
 
@@ -37,7 +39,7 @@ pub struct UmaData {
     /// 初始五维
     pub five_status_initial: Array5,
     /// 比赛回合
-    pub races: Vec<u32>,
+    pub races: Vec<i32>,
     /// 自由比赛回合
     pub free_races: Vec<FreeRaceData>
 }
@@ -140,13 +142,23 @@ impl SupportCardData {
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct ActionValue {
     /// 基础属性
+    #[serde(default)]
     pub status_pt: Array6,
     /// 体力
+    #[serde(default)]
     pub vital: i32,
+    /// 最大体力
+    #[serde(default)]
+    pub max_vital: i32,
     /// 干劲
+    #[serde(default)]
     pub motivation: i32,
     /// Hint等级
-    pub hint_level: i32
+    #[serde(default)]
+    pub hint_level: i32,
+    /// 羁绊
+    #[serde(default)]
+    pub friendship: i32
 }
 
 impl ActionValue {
@@ -154,6 +166,12 @@ impl ActionValue {
         let mut s = Explain::status_with_pt(&self.status_pt);
         if self.vital != 0 {
             s += &format!(" 体力{}", self.vital);
+        }
+        if self.max_vital != 0 {
+            s += &format!(" 最大体力+{}", self.max_vital);
+        }
+        if self.friendship != 0 {
+            s += &format!(" 羁绊+{}", self.friendship);
         }
         if self.motivation != 0 {
             s += &format!(" 干劲{}", self.motivation);
@@ -163,27 +181,91 @@ impl ActionValue {
         }
         s
     }
+
+    pub fn map_status<F>(&mut self, f: F) -> &mut Self
+    where
+        F: Fn(i32) -> i32
+    {
+        for i in 0..6 {
+            self.status_pt[i] = f(self.status_pt[i]);
+        }
+        self
+    }
 }
 
 /// 剧本事件信息，也用于临时生成一些固定事件如赛后
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct EventData {
     /// ID, 必须不同, 游戏内ID为9位数，自定义的位数更少
     pub id: u32,
     /// 名字
     pub name: String,
+    /// 对应第几张卡或者理事长记者，计算时随机指定，不在数据里
+    #[serde(default)]
+    pub person_index: Option<i32>,
     /// 可以触发的开始回合
-    pub start_turn: u32,
+    #[serde(default)]
+    pub start_turn: i32,
     /// 结束回合, 不包含
-    pub end_turn: u32,
-    /// 触发阶段
-    pub trigger_stage: TurnStage,
+    #[serde(default)]
+    pub end_turn: i32,
     /// 概率, 100为必发
-    pub trigger_prob: i32,
+    pub prob: i32,
+    /// 为Some时，选项完全随机并按概率分布; 为None时选项交给玩家选择
+    #[serde(default)]
+    pub random_choice_prob: Option<Vec<f32>>,
     /// 最大触发次数, 0为无限
     pub max_trigger_time: u32,
     /// 属性奖励(随机改为平均) 速耐力根智pt，体力
-    pub bonus: ActionValue
+    #[serde(default)]
+    pub choices: Vec<ActionValue>
+}
+
+impl EventData {
+    /// 红点属性事件
+    pub fn hint_attr_event(train: usize, person_index: usize) -> Result<Self> {
+        if train < 5 {
+            let train_name = global!(GAMECONSTANTS).train_names[train].clone();
+            let value = ActionValue {
+                status_pt: global!(GAMECONSTANTS).hint_event_value[train],
+                friendship: 7,
+                ..Default::default()
+            };
+            Ok(Self {
+                id: 101,
+                name: format!("Hint - {train_name}属性"),
+                person_index: Some(person_index as i32),
+                choices: vec![value],
+                ..Default::default()
+            })
+        } else {
+            Err(anyhow!("train越界: {train}"))
+        }
+    }
+
+    /// 红点技能事件
+    pub fn hint_skill_event(hint_level: i32, person_index: usize) -> Self {
+        let value = ActionValue {
+            status_pt: [0, 0, 0, 0, 0, 0],
+            hint_level,
+            friendship: 7,
+            ..Default::default()
+        };
+        Self {
+            id: 101,
+            name: format!("Hint - 技能"),
+            person_index: Some(person_index as i32),
+            choices: vec![value],
+            ..Default::default()
+        }
+    }
+
+    /// 加练事件
+    pub fn extra_training_event(train: usize) -> Self {
+        let mut ret = global!(GAMEDATA).events.system_events["extra_train"].clone();
+        ret.choices[0].status_pt[train] = 5;
+        ret
+    }
 }
 
 /// 剧本状态
@@ -199,11 +281,26 @@ pub struct ScenarioData {
     pub link_charas: Vec<u32>
 }
 
+/// 事件数据表
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct EventCollection {
+    /// 剧本必发事件
+    pub story_events: Vec<EventData>,
+    /// 马娘正面事件
+    pub uma_events: Vec<EventData>,
+    /// 支援卡连续事件
+    pub card_events: Vec<EventData>,
+    /// 友人事件
+    pub friend_events: HashMap<String, EventData>,
+    /// 系统事件
+    pub system_events: HashMap<String, EventData>
+}
 #[derive(Clone, Debug)]
 pub struct GameData {
     pub uma: BTreeMap<String, UmaData>,
     pub card: BTreeMap<String, SupportCardData>,
-    pub text: BTreeMap<String, BTreeMap<String, String>>
+    pub text: BTreeMap<String, BTreeMap<String, String>>,
+    pub events: EventCollection
 }
 
 pub fn load_json<T: DeserializeOwned>(path: &str) -> Result<T> {
@@ -216,8 +313,9 @@ impl GameData {
         let uma: BTreeMap<_, _> = load_json("gamedata/umaDB.json")?;
         let card: BTreeMap<_, _> = load_json("gamedata/cardDB.json")?;
         let text = load_json("gamedata/text_data_dict.json")?;
+        let events = load_json("gamedata/events.json")?;
         info!("载入 {} 马娘, {} 支援卡", uma.len(), card.len());
-        Ok(Self { uma, card, text })
+        Ok(Self { uma, card, text, events })
     }
 
     pub fn get_uma(&self, id: u32) -> Result<&UmaData> {
@@ -246,13 +344,12 @@ pub struct GameConstants {
     pub training_basic_value: Vec<Vec<Vec<i32>>>,
     /// 基础属性上限, 1200不减半
     pub five_status_limit_base: [i32; 5],
+    /// 训练名字
+    pub train_names: Vec<String>,
+    /// 心情名字
+    pub motivation_names: Vec<String>,
     /// 训练会失败的体力阈值，拟合的
     pub training_vital_threshold: Vec<Vec<f32>>,
-    // 友人相关
-    /// 友人羁绊<60, >=60时出门概率
-    pub friend_unlock_prob: [f32; 2],
-    /// 点击友人出现率
-    pub friend_event_prob: f32,
     /// 团队卡Buff解除概率
     pub group_buff_end_prob: Vec<f32>,
     // 评分相关
@@ -265,7 +362,19 @@ pub struct GameConstants {
     /// 评价档次
     pub rank_scores: Vec<i32>,
     /// 评价名字
-    pub rank_names: Vec<String>
+    pub rank_names: Vec<String>,
+    /// 事件出现概率
+    pub event_probs: HashMap<String, f32>,
+    /// 不能出现随机事件的回合
+    pub no_event_turns: Vec<i32>,
+    /// 基础Hint率
+    pub base_hint_rate: f32,
+    /// 每回合的比赛等级
+    pub race_grades: Vec<i32>,
+    /// 休息结果分布 +30=18%,+50=57%,+70=25%
+    pub rest_probs: Vec<i32>,
+    /// 红点属性
+    pub hint_event_value: Vec<Array6>
 }
 
 impl GameConstants {
@@ -286,6 +395,14 @@ impl GameConstants {
                 }
             })
             .unwrap_or("US9".to_string())
+    }
+
+    /// 随机事件为支援卡，马娘，掉心情和不发生的分布
+    pub fn get_event_distribution(&self) -> Vec<f32> {
+        let probs = &self.event_probs;
+        let mut ret = vec![probs["card_event"], probs["uma_event"], probs["drop_motivation"]];
+        ret.push(1.0 - ret[0] - ret[1] - ret[2]);
+        ret
     }
 }
 

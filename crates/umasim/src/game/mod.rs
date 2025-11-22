@@ -31,12 +31,10 @@ pub enum TurnStage {
     StoryShop,
     /// 4. 选择训练或比赛
     Train,
-    /// 5. 回合后，可选事件
+    /// 5. 回合后事件
     AfterTrain,
     // ---
-    /// 6，其他不可选事件
-    AfterEvent,
-    /// 7. 结束，剧本结算
+    /// 6. 结束，剧本结算
     End
 }
 
@@ -61,7 +59,7 @@ pub enum PersonType {
 }
 
 /// 回合阶段
-#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub enum FriendCardState {
     /// 没带
     #[default]
@@ -73,7 +71,7 @@ pub enum FriendCardState {
 }
 
 /// 友人出行阶段
-#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub enum FriendOutState {
     /// 未点击
     #[default]
@@ -113,13 +111,7 @@ pub struct FriendState {
     /// 友人事件体力回复量加成
     pub vital_bonus: i32,
     /// 友人事件效果加成
-    pub event_bonus: i32,
-    /// 友人的羁绊
-    pub friendship: i32,
-    /// NPC理事长羁绊
-    pub friendship_npc_yayoi: i32,
-    /// NPC记者羁绊
-    pub friendship_npc_reporter: i32
+    pub event_bonus: i32
 }
 
 impl FriendState {
@@ -137,7 +129,6 @@ impl FriendState {
             };
             ret.vital_bonus = card.card_value[rank as usize].event_recovery_amount_up;
             ret.event_bonus = card.card_value[rank as usize].event_effect_up;
-            ret.friendship = card.card_value[rank as usize].initial_jiban;
         }
         ret.person_index = index;
         Ok(ret)
@@ -145,9 +136,6 @@ impl FriendState {
 
     pub fn explain(&self) -> String {
         let mut ret = self.out_state.explain();
-        if matches!(self.out_state, FriendOutState::UnClicked | FriendOutState::BeforeUnlock) {
-            ret += &format!(" 友人{}", self.friendship);
-        }
         for (i, b) in self.out_used.iter().enumerate() {
             if *b {
                 ret += &(i + 1).to_string();
@@ -156,10 +144,7 @@ impl FriendState {
         if self.group_buff_turn > 0 {
             ret += &format!(" 团队Buff已持续 {} 回合", self.group_buff_turn);
         }
-        format!(
-            "{} 理事长{} 记者{}",
-            ret, self.friendship_npc_yayoi, self.friendship_npc_reporter
-        )
+        ret
     }
 }
 

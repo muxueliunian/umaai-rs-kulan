@@ -19367,8 +19367,8 @@
   "10111": {
     "cardId": 10111,
     "charaId": 1124,
-    "cardName": "[速]バブルガムフェロー",
-    "fullName": "[トレセン学園]バブルガムフェロー",
+    "cardName": "[速]吹波糖",
+    "fullName": "[トレセン学園]吹波糖",
     "rarity": 1,
     "cardType": 0,
     "cardValue": [
@@ -20082,8 +20082,8 @@
   "10116": {
     "cardId": 10116,
     "charaId": 1128,
-    "cardName": "[根]ブラストワンピース",
-    "fullName": "[トレセン学園]ブラストワンピース",
+    "cardName": "[根]防爆装束",
+    "fullName": "[トレセン学園]防爆装束",
     "rarity": 1,
     "cardType": 3,
     "cardValue": [
@@ -20612,8 +20612,8 @@
   "10119": {
     "cardId": 10119,
     "charaId": 1119,
-    "cardName": "[速]ドリームジャーニー",
-    "fullName": "[トレセン学園]ドリームジャーニー",
+    "cardName": "[速]梦之旅",
+    "fullName": "[トレセン学園]梦之旅",
     "rarity": 1,
     "cardType": 0,
     "cardValue": [
@@ -20787,8 +20787,8 @@
   "10120": {
     "cardId": 10120,
     "charaId": 1075,
-    "cardName": "[智]デアリングタクト",
-    "fullName": "[トレセン学園]デアリングタクト",
+    "cardName": "[智]谋勇兼备",
+    "fullName": "[トレセン学園]谋勇兼备",
     "rarity": 1,
     "cardType": 4,
     "cardValue": [
@@ -20972,8 +20972,8 @@
   "10121": {
     "cardId": 10121,
     "charaId": 1112,
-    "cardName": "[力]デアリングハート",
-    "fullName": "[トレセン学園]デアリングハート",
+    "cardName": "[力]勇敢之心",
+    "fullName": "[トレセン学園]勇敢之心",
     "rarity": 1,
     "cardType": 2,
     "cardValue": [
@@ -21147,8 +21147,8 @@
   "10122": {
     "cardId": 10122,
     "charaId": 1129,
-    "cardName": "[速]アーモンドアイ",
-    "fullName": "[トレセン学園]アーモンドアイ",
+    "cardName": "[速]杏目",
+    "fullName": "[トレセン学園]杏目",
     "rarity": 1,
     "cardType": 0,
     "cardValue": [
@@ -21327,8 +21327,8 @@
   "10123": {
     "cardId": 10123,
     "charaId": 1130,
-    "cardName": "[智]ラッキーライラック",
-    "fullName": "[トレセン学園]ラッキーライラック",
+    "cardName": "[智]旺紫丁",
+    "fullName": "[トレセン学園]旺紫丁",
     "rarity": 1,
     "cardType": 4,
     "cardValue": [
@@ -21507,8 +21507,8 @@
   "10124": {
     "cardId": 10124,
     "charaId": 1131,
-    "cardName": "[力]グランアレグリア",
-    "fullName": "[トレセン学園]グランアレグリア",
+    "cardName": "[力]放声欢呼",
+    "fullName": "[トレセン学園]放声欢呼",
     "rarity": 1,
     "cardType": 2,
     "cardValue": [
@@ -21682,8 +21682,8 @@
   "10125": {
     "cardId": 10125,
     "charaId": 1080,
-    "cardName": "[根]トランセンド",
-    "fullName": "[トレセン学園]トランセンド",
+    "cardName": "[根]创升",
+    "fullName": "[トレセン学園]创升",
     "rarity": 1,
     "cardType": 3,
     "cardValue": [
@@ -21862,8 +21862,8 @@
   "10126": {
     "cardId": 10126,
     "charaId": 1134,
-    "cardName": "[耐]カレンブーケドール",
-    "fullName": "[トレセン学園]カレンブーケドール",
+    "cardName": "[耐]机伶金花",
+    "fullName": "[トレセン学園]机伶金花",
     "rarity": 1,
     "cardType": 1,
     "cardValue": [
@@ -22037,8 +22037,8 @@
   "10127": {
     "cardId": 10127,
     "charaId": 1111,
-    "cardName": "[智]エアメサイア",
-    "fullName": "[トレセン学園]エアメサイア",
+    "cardName": "[智]空中救主",
+    "fullName": "[トレセン学園]空中救主",
     "rarity": 1,
     "cardType": 4,
     "cardValue": [
@@ -22582,8 +22582,8 @@
   "10131": {
     "cardId": 10131,
     "charaId": 1117,
-    "cardName": "[智]ウインバリアシオン",
-    "fullName": "[トレセン学園]ウインバリアシオン",
+    "cardName": "[智]凯旋芭蕾",
+    "fullName": "[トレセン学園]凯旋芭蕾",
     "rarity": 1,
     "cardType": 4,
     "cardValue": [
@@ -23112,8 +23112,8 @@
   "10134": {
     "cardId": 10134,
     "charaId": 1133,
-    "cardName": "[智]クロノジェネシス",
-    "fullName": "[トレセン学園]クロノジェネシス",
+    "cardName": "[智]创世驹",
+    "fullName": "[トレセン学園]创世驹",
     "rarity": 1,
     "cardType": 4,
     "cardValue": [
@@ -23292,8 +23292,8 @@
   "10135": {
     "cardId": 10135,
     "charaId": 1120,
-    "cardName": "[速]カルストンライトオ",
-    "fullName": "[トレセン学園]カルストンライトオ",
+    "cardName": "[速]金镇之光",
+    "fullName": "[トレセン学園]金镇之光",
     "rarity": 1,
     "cardType": 0,
     "cardValue": [
@@ -23467,8 +23467,8 @@
   "10136": {
     "cardId": 10136,
     "charaId": 1121,
-    "cardName": "[智]デュランダル",
-    "fullName": "[トレセン学園]デュランダル",
+    "cardName": "[智]多旺达",
+    "fullName": "[トレセン学園]多旺达",
     "rarity": 1,
     "cardType": 4,
     "cardValue": [
@@ -23826,6 +23826,186 @@
         "saiHou": 5,
         "hintProbIncrease": 30,
         "deYiLv": 35
+      }
+    ]
+  },
+  "10138": {
+    "cardId": 10138,
+    "charaId": 9050,
+    "cardName": "[友]保科健子",
+    "fullName": "[ゆこま旅館女将]保科健子",
+    "rarity": 1,
+    "cardType": 5,
+    "cardValue": [
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialBonus": [
+          0,
+          0,
+          0,
+          15,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          5
+        ],
+        "hintLevel": 0,
+        "ganJing": 25,
+        "xunLian": 1,
+        "initialJiBan": 15,
+        "eventEffectUp": 20,
+        "failRateDrop": 5,
+        "vitalCostDrop": 10
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialBonus": [
+          0,
+          0,
+          0,
+          16,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          5
+        ],
+        "hintLevel": 0,
+        "ganJing": 27,
+        "xunLian": 1,
+        "initialJiBan": 16,
+        "eventEffectUp": 21,
+        "failRateDrop": 6,
+        "vitalCostDrop": 11
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialBonus": [
+          0,
+          0,
+          0,
+          18,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          5
+        ],
+        "hintLevel": 0,
+        "ganJing": 30,
+        "xunLian": 1,
+        "initialJiBan": 18,
+        "eventEffectUp": 22,
+        "failRateDrop": 8,
+        "vitalCostDrop": 12
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialBonus": [
+          0,
+          0,
+          0,
+          20,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          5
+        ],
+        "hintLevel": 0,
+        "ganJing": 32,
+        "xunLian": 1,
+        "initialJiBan": 20,
+        "eventEffectUp": 23,
+        "failRateDrop": 10,
+        "vitalCostDrop": 13
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialBonus": [
+          0,
+          0,
+          0,
+          20,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          5
+        ],
+        "hintLevel": 0,
+        "ganJing": 35,
+        "xunLian": 5,
+        "initialJiBan": 20,
+        "eventEffectUp": 25,
+        "failRateDrop": 10,
+        "vitalCostDrop": 15
       }
     ]
   },
@@ -38579,8 +38759,8 @@
   "20082": {
     "cardId": 20082,
     "charaId": 1124,
-    "cardName": "[速]バブルガムフェロー",
-    "fullName": "[先陣スプラッシュ！]バブルガムフェロー",
+    "cardName": "[速]吹波糖",
+    "fullName": "[先陣スプラッシュ！]吹波糖",
     "rarity": 2,
     "cardType": 0,
     "cardValue": [
@@ -38766,8 +38946,8 @@
   "20083": {
     "cardId": 20083,
     "charaId": 1086,
-    "cardName": "[耐]メジロラモーヌ",
-    "fullName": "[月下麗人]メジロラモーヌ",
+    "cardName": "[耐]目白高峰",
+    "fullName": "[月下麗人]目白高峰",
     "rarity": 2,
     "cardType": 1,
     "cardValue": [
@@ -38948,8 +39128,8 @@
   "20084": {
     "cardId": 20084,
     "charaId": 1130,
-    "cardName": "[智]ラッキーライラック",
-    "fullName": "[喜びの咲く刻]ラッキーライラック",
+    "cardName": "[智]旺紫丁",
+    "fullName": "[喜びの咲く刻]旺紫丁",
     "rarity": 2,
     "cardType": 4,
     "cardValue": [
@@ -39140,8 +39320,8 @@
   "20085": {
     "cardId": 20085,
     "charaId": 1013,
-    "cardName": "[根]メジロマックイーン",
-    "fullName": "[メロンなささやき]メジロマックイーン",
+    "cardName": "[根]目白麦昆",
+    "fullName": "[メロンなささやき]目白麦昆",
     "rarity": 2,
     "cardType": 3,
     "cardValue": [
@@ -39322,8 +39502,8 @@
   "20086": {
     "cardId": 20086,
     "charaId": 1030,
-    "cardName": "[速]ライスシャワー",
-    "fullName": "[『しあわせの青いバラ』]ライスシャワー",
+    "cardName": "[速]米浴",
+    "fullName": "[『しあわせの青いバラ』]米浴",
     "rarity": 2,
     "cardType": 0,
     "cardValue": [
@@ -39504,8 +39684,8 @@
   "20087": {
     "cardId": 20087,
     "charaId": 1112,
-    "cardName": "[力]デアリングハート",
-    "fullName": "[Daring Music]デアリングハート",
+    "cardName": "[力]勇敢之心",
+    "fullName": "[Daring Music]勇敢之心",
     "rarity": 2,
     "cardType": 2,
     "cardValue": [
@@ -39691,8 +39871,8 @@
   "20088": {
     "cardId": 20088,
     "charaId": 1134,
-    "cardName": "[耐]カレンブーケドール",
-    "fullName": "[一輪ずつ、喜びを束ねて]カレンブーケドール",
+    "cardName": "[耐]机伶金花",
+    "fullName": "[一輪ずつ、喜びを束ねて]机伶金花",
     "rarity": 2,
     "cardType": 1,
     "cardValue": [
@@ -39878,8 +40058,8 @@
   "20089": {
     "cardId": 20089,
     "charaId": 1039,
-    "cardName": "[根]カワカミプリンセス",
-    "fullName": "[私たちのプリンセス流儀]カワカミプリンセス",
+    "cardName": "[根]川上公主",
+    "fullName": "[私たちのプリンセス流儀]川上公主",
     "rarity": 2,
     "cardType": 3,
     "cardValue": [
@@ -40060,8 +40240,8 @@
   "20090": {
     "cardId": 20090,
     "charaId": 1054,
-    "cardName": "[智]ビコーペガサス",
-    "fullName": "[ニャンともイカすヒーローさ]ビコーペガサス",
+    "cardName": "[智]微光飞驹",
+    "fullName": "[ニャンともイカすヒーローさ]微光飞驹",
     "rarity": 2,
     "cardType": 4,
     "cardValue": [
@@ -40435,6 +40615,193 @@
     ],
     "uniqueEffectType": 0,
     "uniqueEffectSummary": "スキルポイントボーナス(1),初期速度アップ(20)"
+  },
+  "20092": {
+    "cardId": 20092,
+    "charaId": 1099,
+    "cardName": "[力]北港火山",
+    "fullName": "[続け故郷へ、けっぱり道！]北港火山",
+    "rarity": 2,
+    "cardType": 2,
+    "cardValue": [
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "initialBonus": [
+          0,
+          0,
+          10,
+          0,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          10
+        ],
+        "hintLevel": 2,
+        "youQing": 20,
+        "ganJing": 40,
+        "initialJiBan": 20,
+        "saiHou": 5,
+        "hintProbIncrease": 1,
+        "deYiLv": 35,
+        "xunLian": 5
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "initialBonus": [
+          0,
+          0,
+          10,
+          0,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          10
+        ],
+        "hintLevel": 2,
+        "youQing": 21,
+        "ganJing": 42,
+        "initialJiBan": 21,
+        "saiHou": 6,
+        "hintProbIncrease": 20,
+        "deYiLv": 38,
+        "xunLian": 5
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "initialBonus": [
+          0,
+          0,
+          10,
+          0,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          10
+        ],
+        "hintLevel": 2,
+        "youQing": 22,
+        "ganJing": 45,
+        "initialJiBan": 22,
+        "saiHou": 7,
+        "hintProbIncrease": 25,
+        "deYiLv": 42,
+        "xunLian": 5
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "initialBonus": [
+          0,
+          0,
+          10,
+          0,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          15
+        ],
+        "hintLevel": 3,
+        "youQing": 23,
+        "ganJing": 47,
+        "initialJiBan": 23,
+        "saiHou": 8,
+        "hintProbIncrease": 30,
+        "deYiLv": 46,
+        "xunLian": 5
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "initialBonus": [
+          0,
+          0,
+          30,
+          0,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          15
+        ],
+        "hintLevel": 3,
+        "youQing": 25,
+        "ganJing": 50,
+        "initialJiBan": 25,
+        "saiHou": 10,
+        "hintProbIncrease": 30,
+        "deYiLv": 50,
+        "xunLian": 5
+      }
+    ],
+    "uniqueEffectType": 0,
+    "uniqueEffectSummary": "スキルポイントボーナス(1),xunLian(5)"
   },
   "30001": {
     "cardId": 30001,
@@ -82114,8 +82481,8 @@
   "30229": {
     "cardId": 30229,
     "charaId": 1019,
-    "cardName": "[智]アグネスデジタル",
-    "fullName": "[【告知】新刊あります！]アグネスデジタル",
+    "cardName": "[智]爱丽数码",
+    "fullName": "[【告知】新刊あります！]爱丽数码",
     "rarity": 3,
     "cardType": 4,
     "cardValue": [
@@ -82314,8 +82681,8 @@
   "30230": {
     "cardId": 30230,
     "charaId": 1058,
-    "cardName": "[速]メイショウドトウ",
-    "fullName": "[不屈の遠吠え]メイショウドトウ",
+    "cardName": "[速]名将怒涛",
+    "fullName": "[不屈の遠吠え]名将怒涛",
     "rarity": 3,
     "cardType": 0,
     "cardValue": [
@@ -82509,8 +82876,8 @@
   "30231": {
     "cardId": 30231,
     "charaId": 1015,
-    "cardName": "[力]テイエムオペラオー",
-    "fullName": "[王を統べて覇す者]テイエムオペラオー",
+    "cardName": "[力]好歌剧",
+    "fullName": "[王を統べて覇す者]好歌剧",
     "rarity": 3,
     "cardType": 2,
     "cardValue": [
@@ -82694,8 +83061,8 @@
   "30232": {
     "cardId": 30232,
     "charaId": 1128,
-    "cardName": "[根]ブラストワンピース",
-    "fullName": "[Blast Off!]ブラストワンピース",
+    "cardName": "[根]防爆装束",
+    "fullName": "[Blast Off!]防爆装束",
     "rarity": 3,
     "cardType": 3,
     "cardValue": [
@@ -82889,8 +83256,8 @@
   "30233": {
     "cardId": 30233,
     "charaId": 1017,
-    "cardName": "[智]シンボリルドルフ",
-    "fullName": "[雲煙飛動]シンボリルドルフ",
+    "cardName": "[智]鲁道夫象征",
+    "fullName": "[雲煙飛動]鲁道夫象征",
     "rarity": 3,
     "cardType": 4,
     "cardValue": [
@@ -83089,8 +83456,8 @@
   "30234": {
     "cardId": 30234,
     "charaId": 1071,
-    "cardName": "[力]メジロアルダン",
-    "fullName": "[深窓の少女へ]メジロアルダン",
+    "cardName": "[力]目白阿尔丹",
+    "fullName": "[深窓の少女へ]目白阿尔丹",
     "rarity": 3,
     "cardType": 2,
     "cardValue": [
@@ -83284,8 +83651,8 @@
   "30235": {
     "cardId": 30235,
     "charaId": 1004,
-    "cardName": "[速]マルゼンスキー",
-    "fullName": "[ふりさけみれば天花のわらう]マルゼンスキー",
+    "cardName": "[速]丸善斯基",
+    "fullName": "[ふりさけみれば天花のわらう]丸善斯基",
     "rarity": 3,
     "cardType": 0,
     "cardValue": [
@@ -83469,8 +83836,8 @@
   "30236": {
     "cardId": 30236,
     "charaId": 1042,
-    "cardName": "[速]シーキングザパール",
-    "fullName": "[飛び立つヴィーナス]シーキングザパール",
+    "cardName": "[速]采珠",
+    "fullName": "[飛び立つヴィーナス]采珠",
     "rarity": 3,
     "cardType": 0,
     "cardValue": [
@@ -83664,8 +84031,8 @@
   "30237": {
     "cardId": 30237,
     "charaId": 1038,
-    "cardName": "[根]カレンチャン",
-    "fullName": "[Cutest in Ur ♡]カレンチャン",
+    "cardName": "[根]真机伶",
+    "fullName": "[Cutest in Ur ♡]真机伶",
     "rarity": 3,
     "cardType": 3,
     "cardValue": [
@@ -83859,8 +84226,8 @@
   "30238": {
     "cardId": 30238,
     "charaId": 1063,
-    "cardName": "[智]イクノディクタス",
-    "fullName": "[鉄の乙女も微笑んで]イクノディクタス",
+    "cardName": "[智]生野狄杜斯",
+    "fullName": "[鉄の乙女も微笑んで]生野狄杜斯",
     "rarity": 3,
     "cardType": 4,
     "cardValue": [
@@ -84059,8 +84426,8 @@
   "30239": {
     "cardId": 30239,
     "charaId": 1060,
-    "cardName": "[耐]ナイスネイチャ",
-    "fullName": "[これきり、特別ですよ？]ナイスネイチャ",
+    "cardName": "[耐]优秀素质",
+    "fullName": "[これきり、特別ですよ？]优秀素质",
     "rarity": 3,
     "cardType": 1,
     "cardValue": [
@@ -84244,8 +84611,8 @@
   "30240": {
     "cardId": 30240,
     "charaId": 1094,
-    "cardName": "[耐]ジャングルポケット",
-    "fullName": "[『最強は俺だ！！』]ジャングルポケット",
+    "cardName": "[耐]森林宝穴",
+    "fullName": "[『最強は俺だ！！』]森林宝穴",
     "rarity": 3,
     "cardType": 1,
     "cardValue": [
@@ -84429,8 +84796,8 @@
   "30241": {
     "cardId": 30241,
     "charaId": 9047,
-    "cardName": "[团]伝説の体現者",
-    "fullName": "[導きの光]伝説の体現者",
+    "cardName": "[团]速度象征",
+    "fullName": "[導きの光]速度象征",
     "rarity": 3,
     "cardType": 6,
     "cardValue": [
@@ -84814,8 +85181,8 @@
   "30243": {
     "cardId": 30243,
     "charaId": 1131,
-    "cardName": "[力]グランアレグリア",
-    "fullName": "[NEW TALES AWAIT]グランアレグリア",
+    "cardName": "[力]放声欢呼",
+    "fullName": "[NEW TALES AWAIT]放声欢呼",
     "rarity": 3,
     "cardType": 2,
     "cardValue": [
@@ -85004,8 +85371,8 @@
   "30244": {
     "cardId": 30244,
     "charaId": 1074,
-    "cardName": "[耐]メジロブライト",
-    "fullName": "[春、来たれり]メジロブライト",
+    "cardName": "[耐]目白光明",
+    "fullName": "[春、来たれり]目白光明",
     "rarity": 3,
     "cardType": 1,
     "cardValue": [
@@ -85199,8 +85566,8 @@
   "30245": {
     "cardId": 30245,
     "charaId": 1008,
-    "cardName": "[力]ウオッカ",
-    "fullName": "[Ballroom Tempest]ウオッカ",
+    "cardName": "[力]伏特加",
+    "fullName": "[Ballroom Tempest]伏特加",
     "rarity": 3,
     "cardType": 2,
     "cardValue": [
@@ -85394,8 +85761,8 @@
   "30246": {
     "cardId": 30246,
     "charaId": 1119,
-    "cardName": "[速]ドリームジャーニー",
-    "fullName": "[誘うは夢心地]ドリームジャーニー",
+    "cardName": "[速]梦之旅",
+    "fullName": "[誘うは夢心地]梦之旅",
     "rarity": 3,
     "cardType": 0,
     "cardValue": [
@@ -85589,8 +85956,8 @@
   "30247": {
     "cardId": 30247,
     "charaId": 1083,
-    "cardName": "[速]シンボリクリスエス",
-    "fullName": "[Operation: Escort]シンボリクリスエス",
+    "cardName": "[速]吉兆",
+    "fullName": "[Operation: Escort]吉兆",
     "rarity": 3,
     "cardType": 0,
     "cardValue": [
@@ -85774,8 +86141,8 @@
   "30248": {
     "cardId": 30248,
     "charaId": 1075,
-    "cardName": "[智]デアリングタクト",
-    "fullName": "[無垢の白妙]デアリングタクト",
+    "cardName": "[智]谋勇兼备",
+    "fullName": "[無垢の白妙]谋勇兼备",
     "rarity": 3,
     "cardType": 4,
     "cardValue": [
@@ -85974,8 +86341,8 @@
   "30249": {
     "cardId": 30249,
     "charaId": 1080,
-    "cardName": "[根]トランセンド",
-    "fullName": "[繋がれパレード・ノーツ♪]トランセンド",
+    "cardName": "[根]创升",
+    "fullName": "[繋がれパレード・ノーツ♪]创升",
     "rarity": 3,
     "cardType": 3,
     "cardValue": [
@@ -86169,8 +86536,8 @@
   "30250": {
     "cardId": 30250,
     "charaId": 1114,
-    "cardName": "[力]ブエナビスタ",
-    "fullName": "[Luz de ensueño]ブエナビスタ",
+    "cardName": "[力]迷人景致",
+    "fullName": "[Luz de ensueño]迷人景致",
     "rarity": 3,
     "cardType": 2,
     "cardValue": [
@@ -86364,8 +86731,8 @@
   "30251": {
     "cardId": 30251,
     "charaId": 1081,
-    "cardName": "[根]エスポワールシチー",
-    "fullName": "[約束のglitter]エスポワールシチー",
+    "cardName": "[根]希望之城",
+    "fullName": "[約束のglitter]希望之城",
     "rarity": 3,
     "cardType": 3,
     "cardValue": [
@@ -86554,8 +86921,8 @@
   "30252": {
     "cardId": 30252,
     "charaId": 1002,
-    "cardName": "[根]サイレンススズカ",
-    "fullName": "[My Beloved Scenery]サイレンススズカ",
+    "cardName": "[根]无声铃鹿",
+    "fullName": "[My Beloved Scenery]无声铃鹿",
     "rarity": 3,
     "cardType": 3,
     "cardValue": [
@@ -86749,8 +87116,8 @@
   "30253": {
     "cardId": 30253,
     "charaId": 1109,
-    "cardName": "[速]ラインクラフト",
-    "fullName": "[Unveiled Dream]ラインクラフト",
+    "cardName": "[速]莱茵力量",
+    "fullName": "[Unveiled Dream]莱茵力量",
     "rarity": 3,
     "cardType": 0,
     "cardValue": [
@@ -86944,8 +87311,8 @@
   "30254": {
     "cardId": 30254,
     "charaId": 1112,
-    "cardName": "[智]デアリングハート",
-    "fullName": "[Blooming Buds]デアリングハート",
+    "cardName": "[智]勇敢之心",
+    "fullName": "[Blooming Buds]勇敢之心",
     "rarity": 3,
     "cardType": 4,
     "cardValue": [
@@ -87144,8 +87511,8 @@
   "30255": {
     "cardId": 30255,
     "charaId": 1111,
-    "cardName": "[智]エアメサイア",
-    "fullName": "[いつか深まる若草]エアメサイア",
+    "cardName": "[智]空中救主",
+    "fullName": "[いつか深まる若草]空中救主",
     "rarity": 3,
     "cardType": 4,
     "cardValue": [
@@ -87339,8 +87706,8 @@
   "30256": {
     "cardId": 30256,
     "charaId": 1021,
-    "cardName": "[力]タマモクロス",
-    "fullName": "[白き稲妻の如く]タマモクロス",
+    "cardName": "[力]玉藻十字",
+    "fullName": "[白き稲妻の如く]玉藻十字",
     "rarity": 3,
     "cardType": 2,
     "cardValue": [
@@ -87529,8 +87896,8 @@
   "30257": {
     "cardId": 30257,
     "charaId": 9049,
-    "cardName": "[友]タッカーブライン",
-    "fullName": "[本能は吼えているか！？]タッカーブライン",
+    "cardName": "[友]塔可布莱恩",
+    "fullName": "[本能は吼えているか！？]塔可布莱恩",
     "rarity": 3,
     "cardType": 5,
     "cardValue": [
@@ -87724,8 +88091,8 @@
   "30258": {
     "cardId": 30258,
     "charaId": 1027,
-    "cardName": "[耐]メジロライアン",
-    "fullName": "[瞳に闘志を胸に勝利の渇望を]メジロライアン",
+    "cardName": "[耐]目白赖恩",
+    "fullName": "[瞳に闘志を胸に勝利の渇望を]目白赖恩",
     "rarity": 3,
     "cardType": 1,
     "cardValue": [
@@ -88109,8 +88476,8 @@
   "30260": {
     "cardId": 30260,
     "charaId": 1013,
-    "cardName": "[速]メジロマックイーン",
-    "fullName": "[グレイッシュPARTY☆]メジロマックイーン",
+    "cardName": "[速]目白麦昆",
+    "fullName": "[グレイッシュPARTY☆]目白麦昆",
     "rarity": 3,
     "cardType": 0,
     "cardValue": [
@@ -88304,8 +88671,8 @@
   "30261": {
     "cardId": 30261,
     "charaId": 1117,
-    "cardName": "[智]ウインバリアシオン",
-    "fullName": "[水面のプリンシパル]ウインバリアシオン",
+    "cardName": "[智]凯旋芭蕾",
+    "fullName": "[水面のプリンシパル]凯旋芭蕾",
     "rarity": 3,
     "cardType": 4,
     "cardValue": [
@@ -88504,8 +88871,8 @@
   "30262": {
     "cardId": 30262,
     "charaId": 1108,
-    "cardName": "[耐]ドゥラメンテ",
-    "fullName": "[Tranquillo]ドゥラメンテ",
+    "cardName": "[耐]大鸣大放",
+    "fullName": "[Tranquillo]大鸣大放",
     "rarity": 3,
     "cardType": 1,
     "cardValue": [
@@ -88694,8 +89061,8 @@
   "30263": {
     "cardId": 30263,
     "charaId": 1091,
-    "cardName": "[力]ヴィブロス",
-    "fullName": "[極上スマイルはっし～ん♪]ヴィブロス",
+    "cardName": "[力]强击",
+    "fullName": "[極上スマイルはっし～ん♪]强击",
     "rarity": 3,
     "cardType": 2,
     "cardValue": [
@@ -88884,8 +89251,8 @@
   "30264": {
     "cardId": 30264,
     "charaId": 1135,
-    "cardName": "[根]ステイゴールド",
-    "fullName": "[気まぐれ渡り星]ステイゴールド",
+    "cardName": "[根]黄金旅程",
+    "fullName": "[気まぐれ渡り星]黄金旅程",
     "rarity": 3,
     "cardType": 3,
     "cardValue": [
@@ -89079,8 +89446,8 @@
   "30265": {
     "cardId": 30265,
     "charaId": 1118,
-    "cardName": "[速]アドマイヤグルーヴ",
-    "fullName": "[氷結晶の静域]アドマイヤグルーヴ",
+    "cardName": "[速]爱慕律动",
+    "fullName": "[氷結晶の静域]爱慕律动",
     "rarity": 3,
     "cardType": 0,
     "cardValue": [
@@ -89274,8 +89641,8 @@
   "30266": {
     "cardId": 30266,
     "charaId": 1133,
-    "cardName": "[智]クロノジェネシス",
-    "fullName": "[この先の未来で]クロノジェネシス",
+    "cardName": "[智]创世驹",
+    "fullName": "[この先の未来で]创世驹",
     "rarity": 3,
     "cardType": 4,
     "cardValue": [
@@ -89469,8 +89836,8 @@
   "30267": {
     "cardId": 30267,
     "charaId": 1120,
-    "cardName": "[速]カルストンライトオ",
-    "fullName": "[カルストンライトオ、猫です]カルストンライトオ",
+    "cardName": "[速]金镇之光",
+    "fullName": "[カルストンライトオ、猫です]金镇之光",
     "rarity": 3,
     "cardType": 0,
     "cardValue": [
@@ -89664,8 +90031,8 @@
   "30268": {
     "cardId": 30268,
     "charaId": 1121,
-    "cardName": "[智]デュランダル",
-    "fullName": "[今宵、我が君のために]デュランダル",
+    "cardName": "[智]多旺达",
+    "fullName": "[今宵、我が君のために]多旺达",
     "rarity": 3,
     "cardType": 4,
     "cardValue": [
@@ -89864,8 +90231,8 @@
   "30269": {
     "cardId": 30269,
     "charaId": 1092,
-    "cardName": "[速]ダンツフレーム",
-    "fullName": "[今日が楽しかったから、]ダンツフレーム",
+    "cardName": "[速]烈焰快驹",
+    "fullName": "[今日が楽しかったから、]烈焰快驹",
     "rarity": 3,
     "cardType": 0,
     "cardValue": [
@@ -90044,8 +90411,8 @@
   "30270": {
     "cardId": 30270,
     "charaId": 1085,
-    "cardName": "[根]ダイイチルビー",
-    "fullName": "[Inseparable]ダイイチルビー",
+    "cardName": "[根]第一红宝石",
+    "fullName": "[Inseparable]第一红宝石",
     "rarity": 3,
     "cardType": 3,
     "cardValue": [
@@ -90234,8 +90601,8 @@
   "30271": {
     "cardId": 30271,
     "charaId": 1005,
-    "cardName": "[根]フジキセキ",
-    "fullName": "[壇上より魔法を込めて]フジキセキ",
+    "cardName": "[根]富士奇石",
+    "fullName": "[壇上より魔法を込めて]富士奇石",
     "rarity": 3,
     "cardType": 3,
     "cardValue": [
@@ -90429,8 +90796,8 @@
   "30272": {
     "cardId": 30272,
     "charaId": 1037,
-    "cardName": "[速]エイシンフラッシュ",
-    "fullName": "[Zirkus der Träume]エイシンフラッシュ",
+    "cardName": "[速]荣进闪耀",
+    "fullName": "[Zirkus der Träume]荣进闪耀",
     "rarity": 3,
     "cardType": 0,
     "cardValue": [
@@ -90624,8 +90991,8 @@
   "30273": {
     "cardId": 30273,
     "charaId": 1048,
-    "cardName": "[力]トーセンジョーダン",
-    "fullName": "[All-Out Brilliance]トーセンジョーダン",
+    "cardName": "[力]东瀛佐敦",
+    "fullName": "[All-Out Brilliance]东瀛佐敦",
     "rarity": 3,
     "cardType": 2,
     "cardValue": [
@@ -90814,8 +91181,8 @@
   "30274": {
     "cardId": 30274,
     "charaId": 1134,
-    "cardName": "[耐]カレンブーケドール",
-    "fullName": "[決意のフローラ]カレンブーケドール",
+    "cardName": "[耐]机伶金花",
+    "fullName": "[決意のフローラ]机伶金花",
     "rarity": 3,
     "cardType": 1,
     "cardValue": [
@@ -91002,6 +91369,591 @@
       100,
       1,
       20,
+      0,
+      0
+    ]
+  },
+  "30275": {
+    "cardId": 30275,
+    "charaId": 1003,
+    "cardName": "[速]东海帝王",
+    "fullName": "[天才的ユートピア]东海帝王",
+    "rarity": 3,
+    "cardType": 0,
+    "cardValue": [
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialBonus": [
+          0,
+          0,
+          5,
+          0,
+          0,
+          30
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          10
+        ],
+        "hintLevel": 2,
+        "youQing": 25,
+        "ganJing": 60,
+        "xunLian": 10,
+        "initialJiBan": 25,
+        "saiHou": 5,
+        "hintProbIncrease": 5,
+        "deYiLv": 60
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialBonus": [
+          0,
+          0,
+          10,
+          0,
+          0,
+          37
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          10
+        ],
+        "hintLevel": 2,
+        "youQing": 27,
+        "ganJing": 70,
+        "xunLian": 11,
+        "initialJiBan": 27,
+        "saiHou": 6,
+        "hintProbIncrease": 5,
+        "deYiLv": 70
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialBonus": [
+          0,
+          0,
+          25,
+          0,
+          0,
+          45
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          10
+        ],
+        "hintLevel": 2,
+        "youQing": 30,
+        "ganJing": 80,
+        "xunLian": 12,
+        "initialJiBan": 30,
+        "saiHou": 7,
+        "hintProbIncrease": 5,
+        "deYiLv": 80
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialBonus": [
+          0,
+          0,
+          25,
+          0,
+          0,
+          52
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          15
+        ],
+        "hintLevel": 3,
+        "youQing": 32,
+        "ganJing": 90,
+        "xunLian": 13,
+        "initialJiBan": 32,
+        "saiHou": 8,
+        "hintProbIncrease": 50,
+        "deYiLv": 90
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialBonus": [
+          0,
+          0,
+          25,
+          0,
+          0,
+          60
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          25
+        ],
+        "hintLevel": 5,
+        "youQing": 35,
+        "ganJing": 100,
+        "xunLian": 15,
+        "initialJiBan": 35,
+        "saiHou": 10,
+        "hintProbIncrease": 100,
+        "deYiLv": 100
+      }
+    ],
+    "uniqueEffectType": 1,
+    "uniqueEffectSummary": "羁绊>=80时スキルポイントボーナス(2)",
+    "uniqueEffectParam": [
+      101,
+      80,
+      30,
+      2,
+      0,
+      0
+    ]
+  },
+  "30276": {
+    "cardId": 30276,
+    "charaId": 9050,
+    "cardName": "[友]保科健子",
+    "fullName": "[ゆるり、ゆこま旅館]保科健子",
+    "rarity": 3,
+    "cardType": 5,
+    "cardValue": [
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "initialBonus": [
+          0,
+          0,
+          0,
+          5,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          5
+        ],
+        "hintLevel": 0,
+        "ganJing": 40,
+        "xunLian": 1,
+        "initialJiBan": 20,
+        "saiHou": 5,
+        "eventEffectUp": 40,
+        "failRateDrop": 10,
+        "vitalCostDrop": 15
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "initialBonus": [
+          0,
+          0,
+          0,
+          10,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          5
+        ],
+        "hintLevel": 0,
+        "ganJing": 45,
+        "xunLian": 1,
+        "initialJiBan": 21,
+        "saiHou": 5,
+        "eventEffectUp": 46,
+        "failRateDrop": 11,
+        "vitalCostDrop": 17
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "initialBonus": [
+          0,
+          0,
+          0,
+          25,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          5
+        ],
+        "hintLevel": 0,
+        "ganJing": 50,
+        "xunLian": 1,
+        "initialJiBan": 23,
+        "saiHou": 5,
+        "eventEffectUp": 53,
+        "failRateDrop": 13,
+        "vitalCostDrop": 20
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "initialBonus": [
+          0,
+          0,
+          0,
+          25,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          5
+        ],
+        "hintLevel": 0,
+        "ganJing": 55,
+        "xunLian": 5,
+        "initialJiBan": 25,
+        "saiHou": 5,
+        "eventEffectUp": 60,
+        "failRateDrop": 15,
+        "vitalCostDrop": 22
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "initialBonus": [
+          0,
+          0,
+          0,
+          25,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          5
+        ],
+        "hintLevel": 0,
+        "ganJing": 60,
+        "xunLian": 10,
+        "initialJiBan": 25,
+        "saiHou": 5,
+        "eventEffectUp": 80,
+        "failRateDrop": 15,
+        "vitalCostDrop": 25
+      }
+    ],
+    "uniqueEffectType": 1,
+    "uniqueEffectSummary": "羁绊>=60时xunLian(5)vitalCostDrop(5)",
+    "uniqueEffectParam": [
+      101,
+      60,
+      8,
+      5,
+      28,
+      5
+    ]
+  },
+  "30277": {
+    "cardId": 30277,
+    "charaId": 1026,
+    "cardName": "[力]美浦波旁",
+    "fullName": "[無機の闘志]美浦波旁",
+    "rarity": 3,
+    "cardType": 2,
+    "cardValue": [
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialBonus": [
+          0,
+          0,
+          5,
+          0,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          15
+        ],
+        "hintLevel": 3,
+        "youQing": 28,
+        "ganJing": 20,
+        "xunLian": 10,
+        "initialJiBan": 25,
+        "saiHou": 1,
+        "hintProbIncrease": 50,
+        "deYiLv": 60
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialBonus": [
+          0,
+          0,
+          10,
+          0,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          15
+        ],
+        "hintLevel": 3,
+        "youQing": 31,
+        "ganJing": 23,
+        "xunLian": 11,
+        "initialJiBan": 27,
+        "saiHou": 1,
+        "hintProbIncrease": 60,
+        "deYiLv": 70
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialBonus": [
+          0,
+          0,
+          25,
+          0,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          15
+        ],
+        "hintLevel": 3,
+        "youQing": 34,
+        "ganJing": 26,
+        "xunLian": 12,
+        "initialJiBan": 30,
+        "saiHou": 1,
+        "hintProbIncrease": 70,
+        "deYiLv": 80
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialBonus": [
+          0,
+          0,
+          25,
+          0,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          20
+        ],
+        "hintLevel": 4,
+        "youQing": 37,
+        "ganJing": 30,
+        "xunLian": 13,
+        "initialJiBan": 32,
+        "saiHou": 5,
+        "hintProbIncrease": 80,
+        "deYiLv": 90
+      },
+      {
+        "filled": true,
+        "bonus": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "initialBonus": [
+          0,
+          0,
+          25,
+          0,
+          0,
+          0
+        ],
+        "hintBonus": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          20
+        ],
+        "hintLevel": 4,
+        "youQing": 40,
+        "ganJing": 30,
+        "xunLian": 15,
+        "initialJiBan": 35,
+        "saiHou": 10,
+        "hintProbIncrease": 80,
+        "deYiLv": 100
+      }
+    ],
+    "uniqueEffectType": 1,
+    "uniqueEffectSummary": "羁绊>=80时スキルポイントボーナス(2)",
+    "uniqueEffectParam": [
+      101,
+      80,
+      30,
+      2,
       0,
       0
     ]

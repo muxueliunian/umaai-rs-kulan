@@ -47,7 +47,7 @@ impl BasePerson {
 
     pub fn explain(&self) -> String {
         let mut ret = self.short_name();
-        if self.card_id.is_some() && self.friendship < 100 {
+        if self.friendship > 0 && self.friendship < 100 {
             ret = format!("{}{}", ret, self.friendship);
         }
         if self.is_hint {
@@ -94,14 +94,26 @@ impl Person for BasePerson {
     fn friendship(&self) -> i32 {
         self.friendship
     }
+    fn set_hint(&mut self, hint: bool) {
+        self.is_hint = hint;
+    }
+    fn hint(&self) -> bool {
+        self.is_hint
+    }
 }
 
 impl TryFrom<&SupportCard> for BasePerson {
     type Error = anyhow::Error;
     fn try_from(card: &SupportCard) -> Result<Self> {
+        let person_type = match card.card_type {
+            0..=4 => PersonType::Card,
+            5 => PersonType::ScenarioCard,
+            6 => PersonType::TeamCard,
+            _ => PersonType::Card
+        };
         Ok(BasePerson {
             person_index: 0,
-            person_type: PersonType::Card,
+            person_type,
             train_type: card.card_type,
             chara_id: card.get_data()?.chara_id,
             friendship: card.friendship,

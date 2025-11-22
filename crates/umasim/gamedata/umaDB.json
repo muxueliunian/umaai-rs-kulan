@@ -6235,6 +6235,46 @@
     ],
     "star": 5
   },
+  "108002": {
+    "bonusData": [],
+    "fiveStatusBonus": [
+      0,
+      0,
+      15,
+      0,
+      15
+    ],
+    "fiveStatusInitial": [
+      112,
+      100,
+      113,
+      108,
+      117
+    ],
+    "freeRaces": [
+      {
+        "startTurn": 12,
+        "endTurn": 31,
+        "count": 1
+      }
+    ],
+    "gameId": 108002,
+    "name": "[宵闇ネオカグラ]创升",
+    "preferRaces": [],
+    "preferReds": [],
+    "races": [
+      11,
+      38,
+      44,
+      46,
+      51,
+      59,
+      66,
+      68,
+      70
+    ],
+    "star": 5
+  },
   "108101": {
     "bonusData": [],
     "fiveStatusBonus": [
@@ -6274,7 +6314,8 @@
       51,
       56,
       59,
-      66
+      66,
+      69
     ],
     "star": 5
   },
@@ -7412,6 +7453,47 @@
     ],
     "star": 5
   },
+  "110002": {
+    "bonusData": [],
+    "fiveStatusBonus": [
+      0,
+      10,
+      10,
+      10,
+      0
+    ],
+    "fiveStatusInitial": [
+      107,
+      105,
+      119,
+      112,
+      107
+    ],
+    "freeRaces": [
+      {
+        "startTurn": 12,
+        "endTurn": 29,
+        "count": 1
+      }
+    ],
+    "gameId": 110002,
+    "name": "[柔灯・湯の香の装い]奇锐骏",
+    "preferRaces": [],
+    "preferReds": [],
+    "races": [
+      11,
+      36,
+      41,
+      47,
+      50,
+      56,
+      59,
+      68,
+      70,
+      71
+    ],
+    "star": 5
+  },
   "110201": {
     "bonusData": [],
     "fiveStatusBonus": [
@@ -8006,6 +8088,42 @@
       56,
       63,
       68
+    ],
+    "star": 5
+  },
+  "111401": {
+    "bonusData": [],
+    "fiveStatusBonus": [
+      10,
+      0,
+      10,
+      0,
+      10
+    ],
+    "fiveStatusInitial": [
+      120,
+      97,
+      122,
+      99,
+      112
+    ],
+    "freeRaces": [],
+    "gameId": 111401,
+    "name": "[Heroína Inocente]迷人景致",
+    "preferRaces": [],
+    "preferReds": [],
+    "races": [
+      11,
+      22,
+      30,
+      33,
+      43,
+      47,
+      56,
+      59,
+      67,
+      69,
+      71
     ],
     "star": 5
   },

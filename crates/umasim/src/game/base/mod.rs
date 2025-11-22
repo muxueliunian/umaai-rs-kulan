@@ -8,8 +8,9 @@ use anyhow::Result;
 use hashbrown::HashMap;
 use log::info;
 pub use person::*;
+use rand::{Rng, rngs::StdRng, seq::IndexedRandom};
 
-use crate::{explain::Explain, game::*, utils::*};
+use crate::{explain::Explain, game::*, gamedata::EventData, utils::*};
 
 /// 一局游戏的基本状态，剧本通用，用于计算，不用于通信(例如通信只传递卡组id)  
 /// 不包含人头信息(Person类型可能不同)，实际的剧本对象需要补上Vec<Person>才能实现Game Trait    
@@ -36,7 +37,9 @@ pub struct BaseGame {
     /// 不在率下降，处理成加算
     pub absent_rate_drop: i32,
     /// 已经触发的事件id和次数
-    pub events: HashMap<u32, u32>
+    pub events: HashMap<u32, u32>,
+    /// 本回合内还没触发的事件(Hint, 点击友人等)
+    pub unresolved_events: Vec<EventData>
 }
 
 impl BaseGame {
@@ -98,12 +101,33 @@ impl BaseGame {
             train_level_count: [0; 5],
             distribution: vec![],
             events: HashMap::new(),
-            absent_rate_drop: 0
+            absent_rate_drop: 0,
+            unresolved_events: vec![]
         })
     }
 
     pub fn base_train_level(&self, train: usize) -> usize {
         (self.train_level_count[train] / 4 + 1).max(0).min(5) as usize
+    }
+    /// 随机选择一个能发生的事件
+    pub fn random_select_event(&self, events: &[EventData], rng: &mut StdRng) -> Option<EventData> {
+        let available_events: Vec<_> = events
+            .iter()
+            .filter(|e| e.max_trigger_time == 0 || *self.events.get(&e.id).unwrap_or(&0) < e.max_trigger_time)
+            .collect();
+        available_events.choose(rng).map(|e| (*e).clone())
+    }
+    /// 使事件生效，无交互或随机判定（训练员无法选择）。如果需要随机判定或选择，需要把事件加入unresolved_events让他在回合后调用
+    pub fn apply_event(&mut self, event: &EventData, choice: usize) {
+        if event.choices.len() > 1 {
+            info!("+ 事件: #{} {}, 选项 {}", event.id, event.name, choice + 1);
+        } else {
+            info!("+ 事件: #{} {}", event.id, event.name);
+        }
+        self.events.entry(event.id).and_modify(|x| *x += 1).or_insert(1);
+        if !event.choices.is_empty() {
+            self.uma.add_value(&event.choices[choice]);
+        }
     }
 }
 
