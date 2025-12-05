@@ -28,6 +28,8 @@ pub struct OnsenScenarioData {
     pub super_effect: OnsenEffect,
     /// 旅馆效果
     pub hotel_effect: Vec<HotelEffect>,
+    /// 挖掘工具名字
+    pub dig_tool_name: Vec<String>,
     /// 挖掘工具等级对应挖掘加成
     pub dig_tool_level: Vec<i32>,
     /// 蓝因子对应挖掘加成
@@ -38,8 +40,6 @@ pub struct OnsenScenarioData {
     pub dig_stat_bonus: Vec<Vec<i32>>,
     /// 不同挖掘时，分别是哪个属性对应挖掘加成
     pub dig_stat_bonus_types: Vec<Vec<i32>>,
-    /// 不同挖掘时，每回合的固定属性加成(不含3体力降低)
-    pub dig_fixed_stat: Vec<Array5>,
     /// 挖掘奖励: [速度, 耐力, 力量, 根性, 智力, 体力变化]
     /// 砂层: [2, 1, 0, 0, 2, -3]
     /// 土层: [2, 0, 1, 2, 0, -3]
@@ -155,10 +155,7 @@ pub struct HotelEffect {
     /// 得意率
     pub deyilv: i32,
     /// Hint数量
-    pub hint: i32,
-    /// 必定超回复
-    #[serde(default)]
-    pub must_super: bool
+    pub hint: i32
 }
 
 pub static ONSENDATA: OnceLock<OnsenScenarioData> = OnceLock::new();

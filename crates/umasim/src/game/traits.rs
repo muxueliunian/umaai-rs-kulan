@@ -169,11 +169,14 @@ pub trait Game: Clone {
     fn has_group_buff(&self) -> bool;
     /// 显示分布信息
     fn explain_distribution(&self) -> Result<String>;
-    /// 重置分布
+    /// 重置分布和叹号
     fn reset_distribution(&mut self) {
         self.distribution_mut().clear();
         for _ in 0..5 {
             self.distribution_mut().push(vec![]);
+        }
+        for p in self.persons_mut() {
+            p.set_hint(false);
         }
     }
     /// 追加分配一个在persons里已经存在的人头, -1为不在
@@ -258,7 +261,7 @@ pub trait Game: Clone {
             .collect();
         for person in self.persons_mut() {
             if person.person_type() == PersonType::Card {
-                let hint_prob = base_hint_rate * ((100 + hint_probs[person.person_index() as usize]) as f32 / 100.0);
+                let hint_prob = base_hint_rate * ((100 + hint_probs[person.person_index() as usize]) as f64 / 100.0);
                 person.set_hint(rng.random_bool(hint_prob as f64));
             }
         }
@@ -408,17 +411,4 @@ pub trait Trainer<G: Game> {
     fn select_action(&self, game: &G, actions: &[<G as Game>::Action], rng: &mut StdRng) -> Result<usize>;
     /// 选择事件选项
     fn select_choice(&self, game: &G, choices: &[ActionValue], rng: &mut StdRng) -> Result<usize>;
-    /// 选择装备升级
-    /// 
-    /// # 参数
-    /// - `game`: 当前游戏状态
-    /// - `options`: 可选装备选项的描述列表
-    /// - `rng`: 随机数生成器
-    /// 
-    /// # 返回
-    /// 选择的装备索引
-    fn select_equipment_upgrade(&self, _game: &G, _options: &[String], _rng: &mut StdRng) -> Result<usize> {
-        // 默认选择第一个
-        Ok(0)
-    }
 }
