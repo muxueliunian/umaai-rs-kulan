@@ -452,7 +452,7 @@ impl OnsenGame {
     }
 
     /// 生成Hint事件
-    pub fn do_hint(&mut self, person_index: usize, rng: &mut StdRng) -> Result<()> {
+    pub fn do_hint(&mut self, person_index: usize, has_friendship: bool, rng: &mut StdRng) -> Result<()> {
         let attr_prob = system_event_prob("hint_attr")?;
         let hint_level = if person_index < 6 {
             (1 + self.deck[person_index].card_value()?.hint_level).min(5)
@@ -467,6 +467,9 @@ impl OnsenGame {
             EventData::hint_skill_event(hint_level, person_index)
         };
         hint_event.name = format!("{} - {}", hint_event.name, self.deck[person_index].short_name()?);
+        if !has_friendship {
+            hint_event.choices[0].friendship = 0;
+        }
         self.unresolved_events.push(hint_event);
         Ok(())
     }
@@ -538,7 +541,7 @@ impl OnsenGame {
 
         // 生成加练或者红点事件
         if let Some(p) = hint_persons.choose(rng) {
-            self.do_hint(*p as usize, rng)?;
+            self.do_hint(*p as usize, true, rng)?;
         }
         let extra_train_prob = system_event_prob("extra_train")?;
         if !self.is_xiahesu() && rng.random_bool(extra_train_prob as f64) {
@@ -710,7 +713,7 @@ impl OnsenGame {
                 let person_index = (0..6)
                     .filter(|x| self.persons[*x].person_type == PersonType::Card)
                     .collect::<Vec<_>>();
-                self.do_hint(*person_index.choose(rng).unwrap_or(&0), rng)?;
+                self.do_hint(*person_index.choose(rng).unwrap_or(&0), false, rng)?;
             }
             
             // 标记超回复已使用

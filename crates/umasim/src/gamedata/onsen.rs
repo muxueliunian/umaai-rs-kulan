@@ -22,6 +22,8 @@ pub struct OnsenScenarioData {
     pub link_effect: HashMap<String, i32>,
     /// pr训练基础值
     pub pr_base_value: ActionValue,
+    /// 生涯比赛倍率
+    pub career_race_multiplier: f32,
     /// 温泉信息
     pub onsen_info: Vec<OnsenInfo>,
     /// 超回复效果

@@ -12,6 +12,7 @@
         "status_pt": [ 6, 6, 6, 6, 6, 15 ],
         "vital": -15
     },
+    "career_race_multiplier": 1.5,
     "onsen_info": [
         {
             "id": 1,
