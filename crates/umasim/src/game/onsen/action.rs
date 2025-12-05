@@ -29,7 +29,9 @@ pub enum OnsenAction {
     /// 使用/不使用温泉券
     UseTicket(bool),
     /// 选择温泉
-    Dig(i32)
+    Dig(i32),
+    /// 升级工具
+    Upgrade(i32)
 }
 
 impl Display for OnsenAction {
@@ -53,6 +55,10 @@ impl Display for OnsenAction {
                 let name = &global!(ONSENDATA).onsen_info[*x as usize].name;
                 write!(f, "挖掘 {}", name.cyan())
             }
+            OnsenAction::Upgrade(x) => {
+                let name = &global!(ONSENDATA).dig_tool_name[*x as usize];
+                write!(f, "升级 {}", name.cyan())
+            }
         }
     }
 }
@@ -66,14 +72,14 @@ impl ActionEnum for OnsenAction {
             OnsenAction::Train(train_type) => {
                 let (success, vital_cost) = game.do_train(*train_type as usize, rng)?;
                 if success {
+                    // 判定超回复。失败时已经在事件里判定了
+                    if vital_cost > 0 {
+                        game.update_super_on_vital_cost(vital_cost, rng);
+                    }
                     // 训练成功后执行挖掘
                     if let Some(dig_value) = game.calc_dig_value(self) {
-                        game.do_dig(&dig_value);
+                        game.do_dig(&dig_value, rng);
                     }
-                }
-                // 超回复判定
-                if vital_cost > 0 {
-                    game.update_super_on_vital_cost(vital_cost, rng);
                 }
                 Ok(())
             }
@@ -83,9 +89,9 @@ impl ActionEnum for OnsenAction {
                 BaseAction::do_race(&mut game.base, rng)?;
                 // 执行挖掘（目标比赛25点，非目标比赛15点）
                 if let Some(dig_value) = game.calc_dig_value(self) {
-                    game.do_dig(&dig_value);
+                    game.do_dig(&dig_value, rng);
                 }
-                // 注：比赛的体力效果通过事件处理，apply时不触发超回复
+                // 注：比赛的体力效果通过事件处理，超回复已经在事件里判定
                 Ok(())
             }
             // ========== 休息/普通外出/治病 ==========
@@ -93,7 +99,7 @@ impl ActionEnum for OnsenAction {
                 self.as_base_action().expect("as_base_action").apply(game, rng)?;
                 // 执行挖掘 (Clinic 挖掘值为0，但仍需调用)
                 if let Some(dig_value) = game.calc_dig_value(self) {
-                    game.do_dig(&dig_value);
+                    game.do_dig(&dig_value, rng);
                 }
                 Ok(())
             }
@@ -103,22 +109,19 @@ impl ActionEnum for OnsenAction {
                 BaseAction::do_friend_outing(&mut game.base, rng)?;
                 // 执行挖掘（基础点25）
                 if let Some(dig_value) = game.calc_dig_value(self) {
-                    game.do_dig(&dig_value);
+                    game.do_dig(&dig_value, rng);
                 }
-                // 注：友人外出的超回复是通过友人事件触发的（事件ID 809050011-809050015）
-                // 不在这里处理，而是在 apply_event 中通过 add_super() 直接获得
+                // 注：友人外出的超回复在 apply_event 中通过 add_super() 直接获得
                 Ok(())
             }
             // ========== PR动作 ==========
             OnsenAction::PR => {
                 let vital_cost = game.do_pr(rng)?;
+                // 超回复判定
+                game.update_super_on_vital_cost(vital_cost, rng);
                 // 执行挖掘（基础点10）
                 if let Some(dig_value) = game.calc_dig_value(self) {
-                    game.do_dig(&dig_value);
-                }
-                // 超回复判定
-                if vital_cost > 0 {
-                    game.update_super_on_vital_cost(vital_cost, rng);
+                    game.do_dig(&dig_value, rng);
                 }
                 Ok(())
             }
@@ -132,8 +135,11 @@ impl ActionEnum for OnsenAction {
             }
             // ========== 挖掘动作（选择温泉） ==========
             OnsenAction::Dig(onsen_index) => {
-                game.do_select_dig(*onsen_index as usize)?;
-                Ok(())
+                game.do_select_dig(*onsen_index as usize)
+            }
+            // ========== 升级工具动作 ==========
+            OnsenAction::Upgrade(tool) => {
+                game.do_upgrade_equipment(*tool as usize)
             }
         }
     }

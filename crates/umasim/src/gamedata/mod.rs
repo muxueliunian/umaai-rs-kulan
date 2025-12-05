@@ -235,7 +235,7 @@ impl EventData {
             let train_name = global!(GAMECONSTANTS).train_names[train].clone();
             let value = ActionValue {
                 status_pt: global!(GAMECONSTANTS).hint_event_value[train],
-                friendship: 7,
+                friendship: 5,
                 ..Default::default()
             };
             Ok(Self {
@@ -255,7 +255,7 @@ impl EventData {
         let value = ActionValue {
             status_pt: [0, 0, 0, 0, 0, 0],
             hint_level,
-            friendship: 7,
+            friendship: 5,
             ..Default::default()
         };
         Self {
@@ -345,7 +345,7 @@ pub struct GameConstants {
     /// 训练会失败的体力阈值，拟合的
     pub training_vital_threshold: Vec<Vec<f32>>,
     /// 团队卡Buff解除概率
-    pub group_buff_end_prob: Vec<f32>,
+    pub group_buff_end_prob: Vec<f64>,
     // 评分相关
     /// 每pt对应分数
     pub pt_score_rate: f32,
@@ -358,11 +358,11 @@ pub struct GameConstants {
     /// 评价名字
     pub rank_names: Vec<String>,
     /// 事件出现概率
-    pub event_probs: HashMap<String, f32>,
+    pub event_probs: HashMap<String, f64>,
     /// 不能出现随机事件的回合
     pub no_event_turns: Vec<i32>,
     /// 基础Hint率
-    pub base_hint_rate: f32,
+    pub base_hint_rate: f64,
     /// 每回合的比赛等级
     pub race_grades: Vec<i32>,
     /// 休息结果分布 +30=18%,+50=57%,+70=25%
@@ -392,7 +392,7 @@ impl GameConstants {
     }
 
     /// 随机事件为支援卡，马娘，掉心情和不发生的分布
-    pub fn get_event_distribution(&self) -> Vec<f32> {
+    pub fn get_event_distribution(&self) -> Vec<f64> {
         let probs = &self.event_probs;
         let mut ret = vec![probs["card_event"], probs["uma_event"], probs["drop_motivation"]];
         ret.push(1.0 - ret[0] - ret[1] - ret[2]);

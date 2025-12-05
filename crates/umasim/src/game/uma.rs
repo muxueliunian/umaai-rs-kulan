@@ -25,8 +25,8 @@ pub struct UmaFlags {
     pub bad_trainer: bool,
     /// 正向思考
     pub positive_thinking: bool,
-    /// 休息心得
-    pub refresh_mind: bool,
+    /// 休息心得，表示持续了几回合
+    pub refresh_mind: i32,
     /// 幸运体质
     pub lucky: bool,
     /// 是否抓过娃娃
@@ -53,9 +53,6 @@ impl UmaFlags {
         if self.positive_thinking {
             s += "正向思考 ";
         }
-        if self.refresh_mind {
-            s += "休息心得 ";
-        }
         if self.lucky {
             s += "幸运体质 ";
         }
@@ -64,6 +61,9 @@ impl UmaFlags {
         }
         if self.ill {
             s += "*生病 ";
+        }
+        if self.refresh_mind > 0 {
+            s += &format!("休息心得({}回合)", self.refresh_mind);
         }
         s
     }
@@ -122,7 +122,7 @@ impl Uma {
             self.total_hints,
             self.race_bonus
         );
-        Ok(ret)
+        Ok(format!("{}", ret.bright_green()))
     }
 
     pub fn new(id: u32) -> Result<Self> {
@@ -184,7 +184,7 @@ mod tests {
 
     #[test]
     fn test_uma() -> Result<()> {
-        init_logger("debug")?;
+        init_logger("info")?;
         init_global()?;
 
         let uma = Uma::new(101901)?;

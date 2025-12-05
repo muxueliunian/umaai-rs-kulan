@@ -1,3 +1,4 @@
+use colored::Colorize;
 use enum_iterator::Sequence;
 use serde::{Deserialize, Serialize};
 
@@ -16,9 +17,7 @@ pub struct OnsenBuff {
     /// 当前的温泉Buff组合
     pub onsen: OnsenEffect,
     /// 当前的旅馆效果
-    pub hotel: HotelEffect,
-    /// 当前挖掘时的固定属性加成
-    pub fixed_stat: Array5
+    pub hotel: HotelEffect
 }
 
 /// 温泉buff信息
@@ -31,10 +30,7 @@ pub struct BathingInfo {
     /// buff是否超回复
     pub is_super: bool,
     /// 下一个buff是否超回复
-    pub is_super_ready: bool,
-    /// 秘汤汤驹效果：追加训练的支援卡索引（在温泉buff激活期间生效）
-    #[serde(default)]
-    pub extra_support_indices: Vec<usize>
+    pub is_super_ready: bool
 }
 
 impl BathingInfo {
@@ -44,9 +40,14 @@ impl BathingInfo {
         } else {
             "Buff未生效".to_string()
         };
+        let super_text = if self.is_super_ready {
+            "超回复".bright_yellow()
+        } else {
+            "普通".bright_black()
+        };
         format!(
-            "温泉券: {}, {}, 超回复预备: {}",
-            self.ticket_num, buff_text, self.is_super_ready
+            "温泉券: {}, {}, {}",
+            self.ticket_num, buff_text, super_text
         )
     }
 }

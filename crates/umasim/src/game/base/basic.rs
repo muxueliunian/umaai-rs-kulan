@@ -117,13 +117,14 @@ impl BasicAction {
                 } else {
                     1
                 };
-                let hint_event = if rng.random_bool(attr_prob as f64) {
+                let mut hint_event = if rng.random_bool(attr_prob as f64) {
                     // 红点提供属性
                     EventData::hint_attr_event(game.persons[*p as usize].train_type as usize, *p as usize)?
                 } else {
                     // 红点提供技能
                     EventData::hint_skill_event(hint_level, *p as usize)
                 };
+                hint_event.name = format!("{} - {}", hint_event.name, game.deck[*p as usize].short_name()?);
                 game.unresolved_events.push(hint_event);
             }
             let extra_train_prob = system_event_prob("extra_train")?;
