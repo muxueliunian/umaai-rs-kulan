@@ -367,7 +367,7 @@
             "prob": 100,
             "max_trigger_time": 0,
             "choices": [{
-                "status_pt": [ 3, 3, 3, 3, 3, 40 ]
+                "status_pt": [ 3, 3, 3, 3, 3, 45 ]
             }]
         },
         "race_g1": {
