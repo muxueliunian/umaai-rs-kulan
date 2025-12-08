@@ -7,29 +7,22 @@ log_level = "off"
 # 训练员类型:
 #   "manual"      - 手动选择（交互式，不支持多次模拟）
 #   "random"      - 猴子训练员（随机选择，用于基准测试）
-#   "mcts"        - 蒙特卡洛搜索（最强，但速度较慢）
 #   "handwritten" - 手写策略（快速，使用启发式规则）
 #   "collector"   - 样本收集器（用于生成神经网络训练数据）
 #   "neuralnet"   - 神经网络训练员（使用 ONNX 模型进行决策）
 #
-# 【样本收集模式说明】
-# 当 trainer = "collector" 时，程序会：
+# 【样本收集模式说明】最初版本，马上就会改了
+# 当 trainer = "collector" 时
 #   1. 运行 simulation_count 次模拟
-#   2. 使用 handwritten 策略进行决策
-#   3. 收集每回合的游戏状态（590维特征）和决策
-#   4. 按最终分数排序，筛选 Top 1% 精英样本
+#   2. 使用手写逻辑进行决策
+#   3. 收集每回合的游戏状态和决策
+#   4. 按最终分数排序，筛选 Top 1% 最强赛马娘精英样本
 #   5. 保存到 training_data.bin 文件
-#
-# 推荐配置（用于生成训练数据）：
-#   trainer = "collector"
-#   simulation_count = 1000000  # 100万次模拟
-#   log_level = "off"           # 关闭日志加速
-#
 # 运行命令: cargo run --release --bin umasim
 trainer = "neuralnet"
 
 # 模拟次数（默认1次，大于1时显示最高分/最低分面板和平均分）
-# collector 模式下，建议设置为 100000 ~ 1000000
+
 simulation_count = 100
 
 # 马娘ID
