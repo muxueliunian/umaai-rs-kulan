@@ -15,7 +15,7 @@ use rand::prelude::StdRng;
 use crate::{
     game::{Trainer, onsen::game::OnsenGame},
     gamedata::ActionValue,
-    search::{Evaluator, HandwrittenEvaluator},
+    neural::{Evaluator, HandwrittenEvaluator},
 };
 
 /// 手写策略训练员

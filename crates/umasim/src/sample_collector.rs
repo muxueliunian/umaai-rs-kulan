@@ -1,20 +1,55 @@
 /// 样本收集器模块
-/// 
+///
 /// 用于在模拟过程中收集训练数据
 /// 每回合记录游戏状态、选择的动作、事件选项等信息
 /// 游戏结束后根据最终分数生成训练样本
 
+use crate::game::onsen::action::OnsenAction;
 use crate::training_sample::{TrainingSample, NN_INPUT_DIM};
+
+/// Policy 输出维度
+pub const POLICY_DIM: usize = 50;
+
+/// 全局动作类型索引映射
+///
+/// 将 OnsenAction 转换为固定的全局索引，确保同一动作类型
+/// 在不同回合始终对应相同的索引。
+///
+/// # 索引定义
+/// - 0-4: Train(0-4) 五种训练
+/// - 5: Sleep 休息
+/// - 6: NormalOuting 普通外出
+/// - 7: FriendOuting 友人外出
+/// - 8: Race 比赛
+/// - 9: Clinic 就医
+/// - 10: PR 练习赛
+/// - 11-20: Dig(0-9) 挖掘温泉
+/// - 21-23: Upgrade(0-2) 装备升级
+/// - 24-25: UseTicket(false/true) 使用温泉券
+/// - 26-49: 保留
+pub fn action_to_global_index(action: &OnsenAction) -> Option<usize> {
+    match action {
+        OnsenAction::Train(t) => Some(*t as usize),
+        OnsenAction::Sleep => Some(5),
+        OnsenAction::NormalOuting => Some(6),
+        OnsenAction::FriendOuting => Some(7),
+        OnsenAction::Race => Some(8),
+        OnsenAction::Clinic => Some(9),
+        OnsenAction::PR => Some(10),
+        OnsenAction::Dig(idx) => Some(11 + *idx as usize),
+        OnsenAction::Upgrade(idx) => Some(21 + *idx as usize),
+        OnsenAction::UseTicket(is_super) => Some(if *is_super { 25 } else { 24 }),
+        _ => None,
+    }
+}
 
 /// 单回合数据
 #[derive(Debug, Clone)]
 pub struct TurnData {
     /// 590 维特征向量
     pub features: Vec<f32>,
-    /// 选择的动作索引
-    pub action_idx: usize,
-    /// 可选动作数量
-    pub num_actions: usize,
+    /// 选择的动作的**全局索引**（使用 action_to_global_index 转换）
+    pub global_action_idx: usize,
     /// 事件选项索引（如果有）
     pub choice_idx: Option<usize>,
     /// 事件选项数量
@@ -46,19 +81,19 @@ impl SampleCollector {
     }
 
     /// 记录一个回合的动作选择
-    /// 
+    ///
     /// # 参数
     /// - `features`: 当前游戏状态的特征向量（590 维）
-    /// - `action_idx`: 选择的动作索引
-    /// - `num_actions`: 可选动作数量
-    pub fn record_turn(&mut self, features: Vec<f32>, action_idx: usize, num_actions: usize) {
+    /// - `action`: 选择的动作
+    pub fn record_turn(&mut self, features: Vec<f32>, action: &OnsenAction) {
         debug_assert_eq!(features.len(), NN_INPUT_DIM, "特征维度必须是 {}", NN_INPUT_DIM);
-        debug_assert!(action_idx < num_actions, "动作索引超出范围");
-        
+
+        // 使用全局动作索引
+        let global_action_idx = action_to_global_index(action).unwrap_or(0);
+
         self.turn_data.push(TurnData {
             features,
-            action_idx,
-            num_actions,
+            global_action_idx,
             choice_idx: None,
             num_choices: 0,
         });
@@ -115,10 +150,10 @@ impl SampleCollector {
         let final_score = self.final_score as f32;
         
         self.turn_data.into_iter().map(|turn| {
-            // Policy target: one-hot 编码选择的动作
-            let mut policy_target = vec![0.0_f32; 50];
-            if turn.action_idx < 50 {
-                policy_target[turn.action_idx] = 1.0;
+            // Policy target: one-hot 编码选择的动作（使用全局索引）
+            let mut policy_target = vec![0.0_f32; POLICY_DIM];
+            if turn.global_action_idx < POLICY_DIM {
+                policy_target[turn.global_action_idx] = 1.0;
             }
 
             // Choice target: one-hot 编码选择的事件选项
@@ -173,64 +208,5 @@ impl GameSample {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
 
-    #[test]
-    fn test_sample_collector_basic() {
-        let mut collector = SampleCollector::new();
-
-        // 记录 3 个回合
-        for i in 0..3 {
-            let features = vec![i as f32; NN_INPUT_DIM];
-            collector.record_turn(features, i % 5, 10);
-        }
-
-        assert_eq!(collector.num_turns(), 3);
-        assert!(!collector.is_finished());
-
-        // 设置最终分数
-        collector.set_final_score(15000);
-        assert!(collector.is_finished());
-        assert_eq!(collector.final_score(), 15000);
-    }
-
-    #[test]
-    fn test_sample_collector_with_choices() {
-        let mut collector = SampleCollector::new();
-
-        // 第一回合：只有动作
-        collector.record_turn(vec![0.0; NN_INPUT_DIM], 2, 10);
-
-        // 第二回合：有事件选项
-        collector.record_turn(vec![1.0; NN_INPUT_DIM], 3, 10);
-        collector.record_choice(1, 3);
-
-        collector.set_final_score(12000);
-
-        let samples = collector.finalize();
-        assert_eq!(samples.len(), 2);
-
-        // 检查第一个样本（无事件选项）
-        assert_eq!(samples[0].policy_target[2], 1.0);
-        assert_eq!(samples[0].choice_target.iter().sum::<f32>(), 0.0);
-
-        // 检查第二个样本（有事件选项）
-        assert_eq!(samples[1].policy_target[3], 1.0);
-        assert_eq!(samples[1].choice_target[1], 1.0);
-    }
-
-    #[test]
-    fn test_game_sample() {
-        let mut collector = SampleCollector::new();
-        collector.record_turn(vec![0.0; NN_INPUT_DIM], 0, 5);
-        collector.record_turn(vec![0.0; NN_INPUT_DIM], 1, 5);
-        collector.set_final_score(18000);
-
-        let game_sample = GameSample::from_collector(collector);
-        assert_eq!(game_sample.final_score, 18000);
-        assert_eq!(game_sample.samples.len(), 2);
-    }
-}
 

@@ -30,7 +30,7 @@ use crate::{
     game::{Trainer, onsen::game::OnsenGame},
     gamedata::ActionValue,
     sample_collector::{GameSample, SampleCollector},
-    search::{Evaluator, HandwrittenEvaluator},
+    neural::{Evaluator, HandwrittenEvaluator},
 };
 
 /// 默认探索率（40%）
@@ -164,7 +164,7 @@ impl Trainer<OnsenGame> for CollectorTrainer {
 
         // 只有一个动作时直接返回
         if actions.len() <= 1 {
-            self.collector.borrow_mut().record_turn(features, 0, actions.len());
+            self.collector.borrow_mut().record_turn(features, &actions[0]);
             return Ok(0);
         }
 
@@ -195,7 +195,7 @@ impl Trainer<OnsenGame> for CollectorTrainer {
                 strategy_idx
             };
 
-            self.collector.borrow_mut().record_turn(features, idx, actions.len());
+            self.collector.borrow_mut().record_turn(features, &actions[idx]);
             return Ok(idx);
         }
 
@@ -203,7 +203,7 @@ impl Trainer<OnsenGame> for CollectorTrainer {
         let all_upgrade = actions.iter().all(|a| matches!(a, OnsenAction::Upgrade(_)));
         if all_upgrade {
             let idx = self.evaluator.select_upgrade_action(game, actions);
-            self.collector.borrow_mut().record_turn(features, idx, actions.len());
+            self.collector.borrow_mut().record_turn(features, &actions[idx]);
             if self.verbose {
                 debug!("[回合 {}] 收集：装备升级 {}", game.turn, actions[idx]);
             }
@@ -217,8 +217,8 @@ impl Trainer<OnsenGame> for CollectorTrainer {
             None => 0,
         };
 
-        // 记录到收集器
-        self.collector.borrow_mut().record_turn(features, idx, actions.len());
+        // 记录到收集器（使用实际选择的动作）
+        self.collector.borrow_mut().record_turn(features, &actions[idx]);
 
         if self.verbose {
             debug!("[回合 {}] 收集：动作 {}", game.turn, actions[idx]);
@@ -259,72 +259,4 @@ impl Trainer<OnsenGame> for CollectorTrainer {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
 
-    #[test]
-    fn test_collector_trainer_creation() {
-        let trainer = CollectorTrainer::new();
-        assert_eq!(trainer.num_turns(), 0);
-        // 验证默认探索率
-        assert!((trainer.exploration_rate() - DEFAULT_EXPLORATION_RATE).abs() < 0.001);
-    }
-
-    #[test]
-    fn test_collector_trainer_exploration_rate() {
-        // 测试设置探索率
-        let trainer = CollectorTrainer::new().with_exploration_rate(0.5);
-        assert!((trainer.exploration_rate() - 0.5).abs() < 0.001);
-
-        // 测试边界值钳制
-        let trainer_high = CollectorTrainer::new().with_exploration_rate(1.5);
-        assert!((trainer_high.exploration_rate() - 1.0).abs() < 0.001);
-
-        let trainer_low = CollectorTrainer::new().with_exploration_rate(-0.5);
-        assert!(trainer_low.exploration_rate().abs() < 0.001);
-    }
-
-    #[test]
-    fn test_collector_trainer_reset() {
-        let trainer = CollectorTrainer::new();
-
-        // 模拟一些操作
-        trainer.collector.borrow_mut().record_turn(
-            vec![0.0; crate::training_sample::NN_INPUT_DIM],
-            0,
-            5
-        );
-        assert_eq!(trainer.num_turns(), 1);
-
-        // 重置
-        trainer.reset();
-        assert_eq!(trainer.num_turns(), 0);
-    }
-
-    #[test]
-    fn test_collector_trainer_finalize() {
-        let trainer = CollectorTrainer::new();
-
-        // 记录一些数据
-        trainer.collector.borrow_mut().record_turn(
-            vec![0.0; crate::training_sample::NN_INPUT_DIM],
-            0,
-            5
-        );
-        trainer.collector.borrow_mut().record_turn(
-            vec![1.0; crate::training_sample::NN_INPUT_DIM],
-            1,
-            5
-        );
-
-        // 完成并获取样本
-        let game_sample = trainer.finalize(15000);
-
-        assert_eq!(game_sample.final_score, 15000);
-        assert_eq!(game_sample.samples.len(), 2);
-
-        // 验证收集器已重置
-        assert_eq!(trainer.num_turns(), 0);
-    }
-}

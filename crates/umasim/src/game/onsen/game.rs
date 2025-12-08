@@ -574,7 +574,7 @@ impl OnsenGame {
         for stat in 0..5 {
             // 计算属性是哪一档
             let mut stat_rank = onsen_data.dig_stat_ranks.len() - 1;
-            while self.uma.five_status[stat] < onsen_data.dig_stat_ranks[stat_rank] {
+            while stat_rank > 0 && self.uma.five_status[stat] < onsen_data.dig_stat_ranks[stat_rank] {
                 stat_rank -= 1;
             }
             for dig_type in 0..3 {

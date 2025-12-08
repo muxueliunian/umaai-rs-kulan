@@ -137,12 +137,12 @@ fn run_collector_mode(
         println!("  平均分: {:.0} ({})", avg, global!(GAMECONSTANTS).get_rank_name(avg_score));
     }
 
-    // 筛选精英样本（Top 1%）
-    let elite_count = (game_samples.len() / 100).max(1);
+    // 筛选精英样本（Top 5%） 可以根据需求设置 最开始1%太少了太难跑了
+    let elite_count = (game_samples.len() / 20).max(1);
     let elite_games: Vec<GameSample> = game_samples.into_iter().take(elite_count).collect();
 
     println!("\n精英筛选:");
-    println!("  筛选数量: {} 局 (Top 1%)", elite_count);
+    println!("  筛选数量: {} 局 (Top 5%)", elite_count);
     if let Some(last) = elite_games.last() {
         println!("  最低精英分数: {} ({})", last.final_score, global!(GAMECONSTANTS).get_rank_name(last.final_score));
     }
@@ -262,17 +262,6 @@ async fn main() -> Result<()> {
                     _ => run_basic_once(&trainer, game_config.uma, &game_config.cards, inherit, &mut rng)?
                 }
             }
-            "mcts" => {
-                let trainer = MctsTrainer::new().verbose(simulation_count == 1);
-                match game_config.scenario.as_str() {
-                    "onsen" => run_onsen_once(&trainer, game_config.uma, &game_config.cards, inherit, &mut rng)?,
-                    _ => {
-                        println!("警告: MCTS 训练员仅支持 onsen 剧本，使用 random 训练员");
-                        let trainer = RandomTrainer;
-                        run_basic_once(&trainer, game_config.uma, &game_config.cards, inherit, &mut rng)?
-                    }
-                }
-            }
             "handwritten" => {
                 let trainer = HandwrittenTrainer::new().verbose(simulation_count == 1);
                 match game_config.scenario.as_str() {
@@ -287,6 +276,28 @@ async fn main() -> Result<()> {
             "collector" => {
                 // 样本收集模式：收集训练数据
                 return run_collector_mode(&game_config, simulation_count, &mut rng);
+            }
+            "neuralnet" | "nn" => {
+                // 神经网络训练员
+                let model_path = "saved_models/onsen_v1/model.onnx";
+                match NeuralNetTrainer::load(model_path) {
+                    Ok(trainer) => {
+                        let trainer = trainer.verbose(simulation_count == 1);
+                        match game_config.scenario.as_str() {
+                            "onsen" => run_onsen_once(&trainer, game_config.uma, &game_config.cards, inherit, &mut rng)?,
+                            _ => {
+                                println!("警告: 神经网络训练员仅支持 onsen 剧本，使用 random 训练员");
+                                let trainer = RandomTrainer;
+                                run_basic_once(&trainer, game_config.uma, &game_config.cards, inherit, &mut rng)?
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        println!("错误: 无法加载神经网络模型 '{}': {}", model_path, e);
+                        println!("请确保模型文件存在，或使用其他训练员");
+                        return Err(e);
+                    }
+                }
             }
             _ => {
                 // 默认使用手动训练员（不支持多次模拟）

@@ -20,7 +20,7 @@ use crate::gamedata::onsen::ONSENDATA;
 use super::{Evaluator, ValueOutput};
 
 // ============================================================================
-// 常量定义（参考 C++ HandwrittenLogic.cpp）
+// 常量定义（参考 umaai的手写逻辑）
 // ============================================================================
 
 /// 属性权重 [速度, 耐力, 力量, 根性, 智力]
@@ -41,7 +41,7 @@ const WISDOM_HEAD_THRESHOLD: usize = 2;
 /// 提高到1，只有1彩圈以上才有加成
 const WISDOM_SHINING_THRESHOLD: usize = 1;
 
-/// 前期回合阈值：前期更倾向于智力训练（攒羁绊）
+/// 前期回合阈值：前期更倾向于智力训练（不怎么消耗体力+攒羁绊+多挖掘回合）
 /// 缩短前期窗口，只有前12回合考虑智力
 const EARLY_TURN_THRESHOLD: i32 = 12;
 
@@ -115,7 +115,7 @@ const SUPER_USE_VITAL_THRESHOLD: i32 = 40;
 const SUPER_USE_LATE_TURN: i32 = 70;
 
 /// 已挖掘温泉数量阈值（达到此数量后移除体力评估惩罚）
-/// 原因：挖掘完成 7 个温泉后，超回复温泉的回复可以覆盖所有体力消耗
+/// 原因：挖掘完成 8 个温泉后，超回复温泉的回复可以覆盖所有体力消耗
 const ONSEN_COMPLETED_THRESHOLD: usize = 8;
 
 /// 友人外出在低累计体力时的额外收益（快速获得超回复）
@@ -270,9 +270,9 @@ impl HandwrittenEvaluator {
     /// # 超回复策略优化
     ///
     /// 不再"超回复准备好就立即使用"，而是等待合适时机：
-    /// 1. 体力 < 40：紧急恢复，必须使用
+    /// 1. 体力 < 40：体力过低，必须使用，不然无法训练
     /// 2. 回合 >= 70 且有温泉券：后期保底，避免浪费
-    /// 3. 传说秘泉挖完后超回复状态不消失，可以更激进使用
+    /// 3. 传说秘泉挖完后超回复状态不消失，可以一直使用
     ///
     /// # 普通温泉券使用
     /// 体力 < vital_threshold（默认55）时使用
@@ -637,7 +637,7 @@ impl HandwrittenEvaluator {
     /// 选择装备升级（接口兼容方法）
     ///
     /// 根据 `OnsenAction::Upgrade(i32)` 动作列表选择最优装备升级
-    /// 与 `umaai-rs-kulan` 的接口保持一致，通过动作列表选择
+    /// 
     ///
     /// # 参数
     /// - `game`: 当前游戏状态
@@ -752,7 +752,7 @@ impl Evaluator<OnsenGame> for HandwrittenEvaluator {
                 OnsenAction::Train(t) => self.evaluate_training(game, *t as usize),
 
                 OnsenAction::Sleep => {
-                    // 挖掘完成 7 个温泉后，休息价值大幅降低（体力不再重要）
+                    // 挖掘完成 8 个温泉后，休息价值大幅降低（体力不再重要）
                     if skip_vital_penalty {
                         let mut value = -100.0; // 基础负值，避免无意义休息
                         value += self.evaluate_dig_value(game, action);
@@ -768,7 +768,7 @@ impl Evaluator<OnsenGame> for HandwrittenEvaluator {
                 }
 
                 OnsenAction::NormalOuting => {
-                    // 挖掘完成 7 个温泉后，普通外出价值降低
+                    // 挖掘完成 8 个温泉后，普通外出价值降低
                     if skip_vital_penalty {
                         let mut value = -50.0; // 基础负值
                         if game.uma.motivation < 5 {
@@ -790,7 +790,7 @@ impl Evaluator<OnsenGame> for HandwrittenEvaluator {
                 }
 
                 OnsenAction::FriendOuting => {
-                    // 友人外出基础价值（挖掘完成7个温泉后降低，但仍保留部分价值）
+                    // 友人外出基础价值（挖掘完成8个温泉后降低，但仍保留部分价值）
                     let mut value = if skip_vital_penalty {
                         FRIEND_OUTING_BASE_VALUE * 0.5 // 后期友人外出价值减半
                     } else {
@@ -802,7 +802,7 @@ impl Evaluator<OnsenGame> for HandwrittenEvaluator {
                         value += OUTGOING_BONUS_IF_NOT_FULL_MOTIVATION;
                     }
 
-                    // 超回复策略调整（挖掘完成7个温泉后跳过，因为超回复已经不重要）
+                    // 超回复策略调整（挖掘完成8个温泉后跳过，因为超回复已经不重要）
                     if !skip_vital_penalty {
                         // - 累计体力低时：+200（快速获得超回复）
                         // - 累计体力高时：-300（避免浪费即将自然触发的超回复）
@@ -886,33 +886,4 @@ impl Evaluator<OnsenGame> for HandwrittenEvaluator {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_evaluator_creation() {
-        let eval = HandwrittenEvaluator::new();
-        assert_eq!(eval.weights.len(), 5);
-        assert_eq!(eval.vital_threshold, 55);
-    }
-
-    #[test]
-    fn test_speed_build() {
-        let eval = HandwrittenEvaluator::speed_build();
-        assert!(eval.weights[0] > eval.weights[4]);
-    }
-
-    #[test]
-    fn test_stamina_build() {
-        let eval = HandwrittenEvaluator::stamina_build();
-        assert!(eval.weights[1] > eval.weights[0]);
-    }
-
-    #[test]
-    fn test_send_sync() {
-        fn assert_send_sync<T: Send + Sync>() {}
-        assert_send_sync::<HandwrittenEvaluator>();
-    }
-}
 

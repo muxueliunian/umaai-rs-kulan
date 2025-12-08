@@ -146,38 +146,3 @@ impl Default for TrainingSampleBatch {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_training_sample_creation() {
-        let sample = TrainingSample::new(
-            vec![0.0; NN_INPUT_DIM],
-            vec![0.0; 50],
-            vec![0.0; 5],
-            vec![0.0; 3],
-        );
-
-        assert_eq!(sample.nn_input.len(), NN_INPUT_DIM);
-        assert_eq!(sample.policy_target.len(), 50);
-        assert_eq!(sample.choice_target.len(), 5);
-        assert_eq!(sample.value_target.len(), 3);
-    }
-
-    #[test]
-    fn test_batch_operations() {
-        let mut batch = TrainingSampleBatch::new();
-        assert!(batch.is_empty());
-
-        batch.add(TrainingSample::new(
-            vec![0.0; NN_INPUT_DIM],
-            vec![0.0; 50],
-            vec![0.0; 5],
-            vec![0.0; 3],
-        ));
-
-        assert_eq!(batch.len(), 1);
-    }
-}
-

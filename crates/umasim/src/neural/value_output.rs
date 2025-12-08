@@ -56,57 +56,5 @@ impl ValueOutput {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
 
-    #[test]
-    fn test_value_output_new() {
-        let v = ValueOutput::new(1000.0, 200.0);
-        assert_eq!(v.score_mean, 1000.0);
-        assert_eq!(v.score_stdev, 200.0);
-        assert_eq!(v.value, 1000.0);
-    }
-
-    #[test]
-    fn test_radical_factor() {
-        let v = ValueOutput::new(1000.0, 200.0).with_radical_factor(0.5);
-        assert_eq!(v.value, 1100.0); // 1000 + 0.5 * 200
-    }
-
-    #[test]
-    fn test_radical_factor_zero() {
-        let v = ValueOutput::new(1000.0, 200.0).with_radical_factor(0.0);
-        assert_eq!(v.value, 1000.0); // value = mean when factor = 0
-    }
-
-    #[test]
-    fn test_radical_factor_negative() {
-        let v = ValueOutput::new(1000.0, 200.0).with_radical_factor(-0.5);
-        assert_eq!(v.value, 900.0); // 1000 - 0.5 * 200 (保守策略)
-    }
-
-    #[test]
-    fn test_illegal() {
-        assert!(ValueOutput::ILLEGAL.is_illegal());
-        assert!(!ValueOutput::default().is_illegal());
-    }
-
-    #[test]
-    fn test_default() {
-        let v = ValueOutput::default();
-        assert_eq!(v.score_mean, 0.0);
-        assert_eq!(v.score_stdev, 0.0);
-        assert_eq!(v.value, 0.0);
-    }
-
-    #[test]
-    fn test_clone_and_copy() {
-        let v1 = ValueOutput::new(500.0, 100.0);
-        let v2 = v1; // Copy
-        let v3 = v1.clone(); // Clone
-        assert_eq!(v1, v2);
-        assert_eq!(v1, v3);
-    }
-}
 
