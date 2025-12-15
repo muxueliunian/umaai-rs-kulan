@@ -463,11 +463,11 @@ impl Default for MctsConfig {
 }
 
 fn default_mcts_search_n() -> usize {
-    1024 // 默认搜索次数
+    10240 // 默认搜索次数
 }
 
 fn default_mcts_radical_factor_max() -> f64 {
-    5.0 // 默认激进度最大值
+    2.0 // 默认激进度最大值
 }
 
 fn default_mcts_max_depth() -> usize {
@@ -483,7 +483,7 @@ fn default_mcts_use_ucb() -> bool {
 }
 
 fn default_mcts_search_group_size() -> usize {
-    128
+    512
 }
 
 fn default_mcts_search_cpuct() -> f64 {
@@ -521,7 +521,10 @@ pub struct GameConfig {
     pub onsen_order: Vec<u32>,
     /// MCTS 配置（可选）
     #[serde(default)]
-    pub mcts: MctsConfig
+    pub mcts: MctsConfig,
+    /// 允许MCTS自由选择温泉
+    #[serde(default)]
+    pub mcts_selected_onsen: bool
 }
 
 fn default_scenario() -> String {

@@ -72,7 +72,8 @@ async fn main() -> Result<()> {
     //NeuralNetEvaluator::load(model_path).map_err(|e| anyhow!("错误: 无法加载神经网络模型 {model_path}: {e:?}"))?;
 
     // MCTS训练员
-    let trainer = MctsTrainer::new(mcts_config).verbose(true);
+    let mut trainer = MctsTrainer::new(mcts_config).verbose(true);
+    trainer.mcts_onsen = game_config.mcts_selected_onsen;
 
     // 开始检测文件
     let mut watcher = UraFileWatcher::init()?;
@@ -102,6 +103,13 @@ async fn main() -> Result<()> {
                     let actions = game.list_actions()?;
                     let action = trainer.select_action(&game, &actions, &mut rng)?;
                     println!("{}", format!("蒙特卡洛: {}", actions[action]).bright_green());
+                    // 如果是不使用温泉券，则前进一步选择训练
+                    if actions[action] == OnsenAction::UseTicket(false) {
+                        game.apply_action(&actions[action], &mut rng)?;
+                        let actions = game.list_actions()?;
+                        let action = trainer.select_action(&game, &actions, &mut rng)?;
+                        println!("{}", format!("蒙特卡洛: {}", actions[action]).bright_green());
+                    }
                 }
             }
             Err(e) => {

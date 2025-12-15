@@ -27,11 +27,19 @@ use crate::{
 /// 其他动作使用 MCTS 搜索评估。
 pub struct MctsTrainer {
     /// 扁平搜索器
-    search: FlatSearch,
+    pub search: FlatSearch,
     /// 手写评估器（用于温泉/装备等特殊场景）
-    evaluator: HandwrittenEvaluator,
+    pub evaluator: HandwrittenEvaluator,
     /// 是否输出详细日志
-    verbose: bool
+    pub verbose: bool,
+    /// 是否搜索温泉
+    pub mcts_onsen: bool,
+    /// 保存上一回合游戏，用于判断
+    pub last_game: Option<OnsenGame>,
+    /// 上一回合均分
+    pub last_mean: f64,
+    /// 第一回合均分
+    pub initial_mean: f64
 }
 
 impl MctsTrainer {
@@ -40,7 +48,11 @@ impl MctsTrainer {
         Self {
             search: FlatSearch::new(config),
             evaluator: HandwrittenEvaluator::new(),
-            verbose: false
+            verbose: false,
+            mcts_onsen: false,
+            last_game: None,
+            initial_mean: 0.0,
+            last_mean: 0.0
         }
     }
 
@@ -77,21 +89,22 @@ impl Trainer<OnsenGame> for MctsTrainer {
         if actions.len() <= 1 {
             return Ok(0);
         }
+        // 检查是否是温泉选择场景（动作是 Dig）
+        let is_dig = actions.iter().any(|a| matches!(a, OnsenAction::Dig(_)));
+        if is_dig && !self.mcts_onsen {
+            // mcts_onsen=false时 温泉选择使用手写逻辑（固定最优顺序）
+            let idx = self.evaluator.select_onsen_index(game, actions);
+            if self.verbose {
+                info!(
+                    "[回合 {}] 选择温泉（手写逻辑）: {}",
+                    game.turn+1,
+                    actions[idx]
+                );
+            }
+            return Ok(idx);
+        }
         /*
-                // 检查是否是温泉选择场景（所有动作都是 Dig）
-                let is_dig = actions.iter().any(|a| matches!(a, OnsenAction::Dig(_)));
-                if is_dig {
-                    // 温泉选择：使用手写逻辑（固定最优顺序）
-                    let idx = self.evaluator.select_onsen_index(game, actions);
-                    if self.verbose {
-                        info!(
-                            "[回合 {}] MCTS 选择温泉（手写逻辑）: {}",
-                            game.turn,
-                            actions[idx]
-                        );
-                    }
-                    return Ok(idx);
-                }
+
 
                 // 检查是否是装备升级场景（所有动作都是 Upgrade）
                 let all_upgrade = actions.iter().all(|a| matches!(a, OnsenAction::Upgrade(_)));
