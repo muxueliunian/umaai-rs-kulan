@@ -601,8 +601,8 @@ impl OnsenGame {
         return Ok((true, vital_cost));
     }
 
-    /// 执行选择温泉
-    pub fn do_select_onsen<T: Trainer<Self>>(&mut self, trainer: &T, rng: &mut StdRng) -> Result<()> {
+    /// 列出可选温泉Action，与list_actions类似
+    pub fn list_actions_onsen_select(&self) -> Vec<OnsenAction> {
         let onsen_info = &global!(ONSENDATA).onsen_info;
         let actions = self
             .onsen_state
@@ -616,6 +616,11 @@ impl OnsenGame {
                 }
             })
             .collect::<Vec<_>>();
+        actions
+    }
+    /// 执行选择温泉
+    pub fn do_select_onsen<T: Trainer<Self>>(&mut self, trainer: &T, rng: &mut StdRng) -> Result<()> {
+        let actions = self.list_actions_onsen_select();
         info!("选择要挖掘的温泉:");
         let selection = trainer.select_action(self, &actions, rng)?;
         self.apply_action(&actions[selection], rng)

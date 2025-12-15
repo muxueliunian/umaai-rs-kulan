@@ -12,7 +12,7 @@ use umasim::{
     game::{
         Game,
         Trainer,
-        onsen::{OnsenTurnStage, game::OnsenGame}
+        onsen::{OnsenTurnStage, action::OnsenAction, game::OnsenGame}
     },
     gamedata::{GameConfig, MctsConfig, init_global},
     neural::{Evaluator, NeuralNetEvaluator},
@@ -72,19 +72,37 @@ async fn main() -> Result<()> {
     //NeuralNetEvaluator::load(model_path).map_err(|e| anyhow!("错误: 无法加载神经网络模型 {model_path}: {e:?}"))?;
 
     // MCTS训练员
-    let trainer = MctsTrainer::new(mcts_config).verbose(false);
+    let trainer = MctsTrainer::new(mcts_config).verbose(true);
 
     // 开始检测文件
     let mut watcher = UraFileWatcher::init()?;
     loop {
         let contents = watcher.watch("thisTurn.json")?;
         match parse_game::<GameStatusOnsen>(&contents) {
-            Ok(game) => {
+            Ok(mut game) => {
                 println!("{}", game.explain_distribution()?);
                 println!("正在计算...");
-                let actions = game.list_actions()?;
-                let action = trainer.select_action(&game, &actions, &mut rng)?;
-                println!("蒙特卡洛: {}", actions[action]);
+                if game.pending_selection {
+                    // 是温泉选择状态
+                    let actions = game.list_actions_onsen_select();
+                    let onsen = trainer.select_action(&game, &actions, &mut rng)?;
+                    println!("{}", format!("蒙特卡洛：{}", actions[onsen]).magenta());
+                    // 前进一步选择升级
+                    game.apply_action(&actions[onsen], &mut rng)?;
+                    let upgradeable = game.get_upgradeable_equipment();
+                    if !upgradeable.is_empty() {
+                        let actions = upgradeable
+                            .iter()
+                            .map(|x| OnsenAction::Upgrade(*x as i32))
+                            .collect::<Vec<_>>();
+                        let upgrade = trainer.select_action(&game, &actions, &mut rng)?;
+                        println!("{}", format!("蒙特卡洛：{}", actions[upgrade]).magenta());
+                    }
+                } else {
+                    let actions = game.list_actions()?;
+                    let action = trainer.select_action(&game, &actions, &mut rng)?;
+                    println!("{}", format!("蒙特卡洛: {}", actions[action]).bright_green());
+                }
             }
             Err(e) => {
                 println!("{}", format!("解析回合信息出错: {e}").red());
