@@ -147,7 +147,13 @@ impl Uma {
     }
 
     pub fn is_race_turn(&self, turn: i32) -> bool {
-        turn == 73 || turn == 75 || turn == 77 || (turn >= 11 && ((1u64 << (turn - 11)) & self.career_races != 0))
+        if turn == 73 || turn == 75 || turn == 77 {
+            true
+        } else if turn < 11 || turn > 72 {
+            false 
+        } else {
+            (1u64 << (turn - 11)) & self.career_races != 0
+        }
     }
 
     /// 计算技能点和总Hint等级换算得到的总pt数，不包括已学习的技能

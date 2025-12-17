@@ -1,9 +1,10 @@
-use std::{io::Write, sync::Mutex};
+use std::{io::Write, process::Command, sync::Mutex};
 
 use anyhow::{Result, anyhow};
+use colored::Colorize;
 use comfy_table::Table;
 use flexi_logger::{DeferredNow, Duplicate, FileSpec, LoggerHandle, style};
-use log::Record;
+use log::{Record, info, warn};
 use serde::Serialize;
 
 use crate::gamedata::{EventCollection, EventData, GAMECONSTANTS, GAMEDATA, LOGGER};
@@ -30,6 +31,31 @@ pub fn init_logger(app: &str, spec: &str) -> Result<()> {
     LOGGER
         .set(Mutex::new(handle))
         .map_err(|_| anyhow!("Logger init failed"))?;
+    Ok(())
+}
+
+/// 把当前工作目录修改为exe所在目录
+pub fn check_working_dir() -> Result<()> {
+    let exe_path = std::env::current_exe()?;
+    let exe_dir = exe_path.parent().expect("parent");
+    println!("正在进入UmaAI所在目录: {exe_dir:?}");
+    std::env::set_current_dir(exe_dir)?;
+    Ok(())
+}
+
+/// 检测终端类型
+pub fn check_windows_terminal() -> Result<()> {
+    if !std::env::var("WT_SESSION").is_ok() {
+        println!("{}", "警告: 当前终端不是Windows Terminal，可能出现乱码或显示不全".yellow());
+        println!("{}", "UmaAI推荐使用Windows Terminal终端，以获得更好的体验".bright_green());
+        pause()?;
+    }
+    Ok(())
+}
+
+pub fn pause() -> Result<()> {
+    println!("按任意键继续...");
+    std::io::stdin().read_line(&mut String::new())?;
     Ok(())
 }
 

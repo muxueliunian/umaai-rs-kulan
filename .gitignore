@@ -4,5 +4,5 @@ logs
 /training_data
 *.pyc
 *.svg
-*.exe
 saved_models
+pub

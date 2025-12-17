@@ -7,6 +7,8 @@
 //! - 生成高质量训练数据（每个状态有准确的价值估计）
 //! - 自对弈训练
 
+use std::sync::atomic::{AtomicU64, Ordering};
+
 use anyhow::Result;
 use flexi_logger::LogSpecification;
 use log::{info, warn};
@@ -36,10 +38,10 @@ pub struct MctsTrainer {
     pub mcts_onsen: bool,
     /// 保存上一回合游戏，用于判断
     pub last_game: Option<OnsenGame>,
-    /// 上一回合均分
-    pub last_mean: f64,
-    /// 第一回合均分
-    pub initial_mean: f64
+    /// 上一回合最好的选择分数. 使用Atomic以实现内部可变
+    pub last_score: AtomicU64,
+    /// 第一回合分数
+    pub initial_score: AtomicU64
 }
 
 impl MctsTrainer {
@@ -51,8 +53,8 @@ impl MctsTrainer {
             verbose: false,
             mcts_onsen: false,
             last_game: None,
-            initial_mean: 0.0,
-            last_mean: 0.0
+            initial_score: AtomicU64::new(0),
+            last_score: AtomicU64::new(0)
         }
     }
 
@@ -70,6 +72,23 @@ impl MctsTrainer {
     /// 获取搜索配置
     pub fn config(&self) -> &SearchConfig {
         self.search.config()
+    }
+
+    /// 和上一回合比较，看是否同一局
+    pub fn is_same_game(&self, game: &OnsenGame) -> bool {
+        if let Some(last) = &self.last_game {
+            // 马娘ID相同且回合数相同或差1，则再检查卡组
+            if last.uma.uma_id == game.uma.uma_id &&
+                (last.turn == game.turn || last.turn + 1 == game.turn) {
+                for i in 0..6 {
+                    if last.deck[i].card_id != game.deck[i].card_id {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        false
     }
 }
 
@@ -132,36 +151,44 @@ impl Trainer<OnsenGame> for MctsTrainer {
 
         global!(LOGGER).lock().expect("logger lock").pop_temp_spec();
 
+        // 计算本回合均分
+        let mut sum = 0.0;
+        let mut mean_weighted = 0.0;
+        let mut count = 0;
+        for r in &search_output.action_results {
+            sum += r.sum;
+            count += r.count();
+            mean_weighted += r.weighted_mean(search_output.radical_factor) * r.count() as f64;
+        }
+        mean_weighted /= count as f64;
+        let turn_score = sum / count as f64;
+        let initial_score = self.initial_score.load(Ordering::SeqCst);
+        let last_score = self.last_score.load(Ordering::SeqCst);
+        let luck_overall = turn_score - initial_score as f64;
+        let luck_turn = turn_score - last_score as f64;
+        let weighted_bonus = mean_weighted - turn_score;
+
         if self.verbose {
             // 输出搜索结果
-            info!(
-                "[回合 {}] MCTS 搜索完成: search_n={}, radical_factor={:.1}",
-                game.turn + 1,
-                self.search.config().search_n,
-                search_output.radical_factor
-            );
-
+            let mut line = vec![];
+            info!("[回合 {}] 均分 {turn_score:.0}, 运气: 本局 {luck_overall:.0}(乐观 + {weighted_bonus:.0}), 本回合 {luck_turn:.0}", game.turn + 1);
             // 输出各动作的分数
             for (i, action) in search_output.actions.iter().enumerate() {
                 let result = &search_output.action_results[i];
                 let weighted = result.weighted_mean(search_output.radical_factor);
-                let marker = if i == search_output.best_action_idx {
-                    " <-- 最优"
-                } else {
-                    ""
-                };
-                info!(
-                    "  {}: mean={:.0}, weighted={:.0}{}",
-                    action,
-                    result.mean(),
-                    weighted,
-                    marker
-                );
+                line.push(format!("{action}: {:.0}", result.mean() - turn_score));
             }
+            info!("[回合 {}] {}", game.turn + 1, line.join(" "));
         }
 
         // 找到最优动作在原列表中的索引
         let idx = actions.iter().position(|a| a == best_action).unwrap_or(0);
+
+        // 保存分数
+        self.last_score.store(turn_score as u64, Ordering::SeqCst);
+        if initial_score == 0 {
+            self.initial_score.store(turn_score as u64, Ordering::SeqCst);
+        }
 
         Ok(idx)
     }

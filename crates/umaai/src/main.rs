@@ -18,7 +18,7 @@ use umasim::{
     neural::{Evaluator, NeuralNetEvaluator},
     search::SearchConfig,
     trainer::{MctsTrainer, NeuralNetTrainer},
-    utils::init_logger
+    utils::{check_windows_terminal, init_logger, pause}
 };
 
 use crate::protocol::{
@@ -50,9 +50,11 @@ where
     Ok(())
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
+/// 实际的主函数
+async fn main_guard() -> Result<()> {
     println!("{}", to_art("UMAAI 0.1".to_string(), "small", 0, 1, 0).expect("here"));
+    // 0. 运行前检查
+    check_windows_terminal()?;
     // 1. 先读取配置文件
     let config_file = fs_err::read_to_string("game_config.toml")?;
     let game_config: GameConfig = toml::from_str(&config_file)?;
@@ -135,6 +137,20 @@ async fn main() -> Result<()> {
             }
         }
     }
+}
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    match main_guard().await {
+        Ok(_) => {}
+        Err(e) => {
+            println!("{}", "UmaAI 出现错误，即将退出:".red());
+            println!("{}", "-----------------------------------".red());
+            println!("{}", format!("{e:?}").red());
+            pause().expect("pause");
+        }
+    }
+    Ok(())
 }
 
 #[cfg(test)]

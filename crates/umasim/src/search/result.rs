@@ -27,10 +27,10 @@ pub struct ActionResult {
     num: u32,
 
     /// 分数总和（用于计算均值）
-    sum: f64,
+    pub sum: f64,
 
     /// 分数平方和（用于计算方差）
-    sum_sq: f64,
+    pub sum_sq: f64,
 
     /// 最小分数
     min_score: f64,

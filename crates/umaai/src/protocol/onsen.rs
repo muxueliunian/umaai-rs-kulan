@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use anyhow::Result;
-use log::warn;
+use log::{info, warn};
 use serde::{Deserialize, Serialize};
 use umasim::{
     game::{
@@ -80,11 +80,11 @@ impl GameStatus for GameStatusOnsen {
     }
 
     fn into_game(self) -> Result<Self::Game> {
-        let base = self.parse_basegame(9050)?;
+        let mut base = self.parse_basegame(9050)?;
         // 默认状态为选择温泉券前
         let mut stage = OnsenTurnStage::Bathing;
         let mut pending = false;
-        if base.turn < 2 || self.onsen.bathing.buff_remain_turn > 0 {
+        if base.turn < 2 || self.onsen.bathing.buff_remain_turn > 0 || self.onsen.bathing.ticket_num == 0 {
             // 不能用温泉券时，不进入Bathing状态
             stage = OnsenTurnStage::Train;
         }
@@ -92,6 +92,11 @@ impl GameStatus for GameStatusOnsen {
             // 温泉选择状态
             stage = OnsenTurnStage::Begin;
             pending = true;
+            // 调整回合状态到新回合开始(仅开局不用调)
+            if base.turn != 2 {
+                base.turn += 1;
+                info!("调整为回合: {}", base.turn+1);
+            }
         } else if self.playing_state != 1 {
             warn!("未知回合状态: {}", self.playing_state);
         }
