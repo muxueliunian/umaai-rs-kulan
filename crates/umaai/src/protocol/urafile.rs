@@ -7,10 +7,10 @@ use std::{
 
 use anyhow::{Result, anyhow};
 use colored::Colorize;
+use log::{info, warn};
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use serde_json::Value;
 use umasim::utils::pause;
-use log::{info, warn};
 
 use crate::protocol::GameStatus;
 

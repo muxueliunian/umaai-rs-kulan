@@ -209,7 +209,9 @@ pub struct SearchOutput {
 
 impl SearchOutput {
     /// 创建搜索输出
-    pub fn new(actions: Vec<OnsenAction>, action_results: Vec<(ActionResult, ActionResult)>, radical_factor: f64) -> Self {
+    pub fn new(
+        actions: Vec<OnsenAction>, action_results: Vec<(ActionResult, ActionResult)>, radical_factor: f64
+    ) -> Self {
         // 找到加权平均分最高的动作
         let best_action_idx = action_results
             .iter()
@@ -236,11 +238,12 @@ impl SearchOutput {
     }
 
     pub fn best_action_2(&self) -> &OnsenAction {
-        let best_action_idx = self.action_results
+        let best_action_idx = self
+            .action_results
             .iter()
             .enumerate()
             .max_by(|(_, a), (_, b)| {
-                let wa = a.1.mean();    // 不使用weighted，有问题
+                let wa = a.1.mean(); // 不使用weighted，有问题
                 let wb = b.1.mean();
                 wa.partial_cmp(&wb).unwrap_or(std::cmp::Ordering::Equal)
             })
@@ -312,7 +315,7 @@ impl SearchOutput {
 
         policy
     }
-/* 
+    /*
     /// 打印搜索结果摘要
     pub fn print_summary(&self) {
         println!("=== 搜索结果 (radical_factor={:.1}) ===", self.radical_factor);

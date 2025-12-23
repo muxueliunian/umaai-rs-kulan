@@ -137,7 +137,7 @@ impl FlatSearch {
         &self, game: &OnsenGame, actions: &[OnsenAction], radical_factor: f64, _rng: &mut StdRng
     ) -> Result<Vec<(ActionResult, ActionResult)>> {
         let num_actions = actions.len();
-        let mut action_results: Vec<(ActionResult, ActionResult)> = vec![Default::default();num_actions];
+        let mut action_results: Vec<(ActionResult, ActionResult)> = vec![Default::default(); num_actions];
         let group_size = self.config.search_group_size;
 
         // 第一阶段：每个动作先搜一组（并行）
@@ -199,7 +199,9 @@ impl FlatSearch {
     /// 使用 UCB 公式选择下一个要搜索的动作
     ///
     /// UCB 公式: search_value = value + cpuct * expected_stdev * sqrt(total_n) / n
-    fn select_ucb_action(&self, action_results: &[(ActionResult, ActionResult)], radical_factor: f64, total_n: f64) -> usize {
+    fn select_ucb_action(
+        &self, action_results: &[(ActionResult, ActionResult)], radical_factor: f64, total_n: f64
+    ) -> usize {
         let sqrt_total = total_n.sqrt();
         let cpuct = self.config.search_cpuct;
         let expected_stdev = self.config.expected_search_stdev;
@@ -260,12 +262,17 @@ impl FlatSearch {
             sim_game.on_simulation_end(&trainer, rng)?;
 
             // 返回最终分数
-            Ok((sim_game.uma().calc_score() as f64, sim_game.uma().calc_score_with_pt_favor() as f64))
+            Ok((
+                sim_game.uma().calc_score() as f64,
+                sim_game.uma().calc_score_with_pt_favor() as f64
+            ))
         }
     }
 
     /// 模拟选择温泉. 因为没有做成单独的阶段，所以单独处理
-    pub fn simulate_onsen_select(&self, game: &OnsenGame, action: &OnsenAction, rng: &mut StdRng) -> Result<(f64, f64)> {
+    pub fn simulate_onsen_select(
+        &self, game: &OnsenGame, action: &OnsenAction, rng: &mut StdRng
+    ) -> Result<(f64, f64)> {
         let mut sim_game = game.clone();
         let mut best_score = (0.0, 0.0);
         //let trainer = SimulationTrainer { evaluator: &self.evaluator };
@@ -290,7 +297,10 @@ impl FlatSearch {
             sim_game.run_stage(&trainer, rng)?;
         }
         sim_game.on_simulation_end(&trainer, rng)?;
-        Ok((sim_game.uma().calc_score() as f64, sim_game.uma().calc_score_with_pt_favor() as f64))
+        Ok((
+            sim_game.uma().calc_score() as f64,
+            sim_game.uma().calc_score_with_pt_favor() as f64
+        ))
     }
 }
 

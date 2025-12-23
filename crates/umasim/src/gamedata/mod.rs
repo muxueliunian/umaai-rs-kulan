@@ -27,7 +27,17 @@ pub struct FreeRaceData {
     // 结束回合
     pub end_turn: u32,
     /// 比赛次数
-    pub count: u32
+    pub count: u32,
+    /// 比赛等级, 可选
+    pub grade: Option<u32>
+}
+
+impl FreeRaceData {
+    /// 返回(start_turn-11..end_turn-11) bit为1 其余为0
+    pub fn turn_mask(&self) -> u64 {
+        let len = self.end_turn - self.start_turn + 1;
+        ((1 << len) - 1) << (self.start_turn - 11)
+    }
 }
 
 /// 马娘数据 UmaDB.json
@@ -552,6 +562,7 @@ fn default_simulation_count() -> usize {
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
+
     use anyhow::Result;
 
     use super::*;
@@ -581,6 +592,19 @@ mod tests {
         println!("{:?}", consts);
 
         println!("{}", consts.get_rank_name(63399));
+        Ok(())
+    }
+
+    #[test]
+    fn test_turn_mask() -> Result<()> {
+        init_logger("test", "info")?;
+        let free_race = FreeRaceData {
+            start_turn: 24,
+            end_turn: 47,
+            count: 1,
+            grade: Some(1)
+        };
+        println!("{:b}", free_race.turn_mask()); // 1111111111111111111111110000000000000
         Ok(())
     }
 }

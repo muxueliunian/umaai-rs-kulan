@@ -467,7 +467,8 @@
       {
         "startTurn": 48,
         "endTurn": 59,
-        "count": 2
+        "count": 2,
+        "grade": 1
       }
     ],
     "gameId": 100601,
@@ -509,7 +510,8 @@
       {
         "startTurn": 48,
         "endTurn": 59,
-        "count": 2
+        "count": 2,
+        "grade": 1
       }
     ],
     "gameId": 100602,
@@ -551,7 +553,8 @@
       {
         "startTurn": 48,
         "endTurn": 59,
-        "count": 2
+        "count": 2,
+        "grade": 1
       }
     ],
     "gameId": 100603,
@@ -1526,7 +1529,8 @@
       {
         "startTurn": 46,
         "endTurn": 59,
-        "count": 3
+        "count": 3,
+        "grade": 1
       }
     ],
     "gameId": 101901,
@@ -1563,7 +1567,8 @@
       {
         "startTurn": 46,
         "endTurn": 59,
-        "count": 3
+        "count": 3,
+        "grade": 1
       }
     ],
     "gameId": 101902,
@@ -1685,7 +1690,8 @@
       {
         "startTurn": 29,
         "endTurn": 48,
-        "count": 4
+        "count": 4,
+        "grade": 3
       }
     ],
     "gameId": 102101,
@@ -1727,7 +1733,8 @@
       {
         "startTurn": 29,
         "endTurn": 48,
-        "count": 4
+        "count": 4,
+        "grade": 3
       }
     ],
     "gameId": 102102,
@@ -3796,7 +3803,8 @@
       {
         "startTurn": 12,
         "endTurn": 24,
-        "count": 2
+        "count": 2,
+        "grade": 4
       }
     ],
     "gameId": 104601,
@@ -3837,7 +3845,8 @@
       {
         "startTurn": 12,
         "endTurn": 24,
-        "count": 2
+        "count": 2,
+        "grade": 4
       }
     ],
     "gameId": 104602,
@@ -3878,7 +3887,8 @@
       {
         "startTurn": 12,
         "endTurn": 24,
-        "count": 2
+        "count": 2,
+        "grade": 4
       }
     ],
     "gameId": 104603,
@@ -5142,7 +5152,8 @@
       {
         "startTurn": 12,
         "endTurn": 23,
-        "count": 1
+        "count": 1,
+        "grade": 1
       }
     ],
     "gameId": 106201,
@@ -5181,7 +5192,8 @@
       {
         "startTurn": 12,
         "endTurn": 23,
-        "count": 1
+        "count": 1,
+        "grade": 1
       }
     ],
     "gameId": 106202,
@@ -5408,7 +5420,8 @@
       {
         "startTurn": 42,
         "endTurn": 56,
-        "count": 3
+        "count": 3,
+        "grade": 3
       }
     ],
     "gameId": 106601,
@@ -6064,12 +6077,14 @@
       {
         "startTurn": 25,
         "endTurn": 31,
-        "count": 1
+        "count": 1,
+        "grade": 3
       },
       {
         "startTurn": 32,
         "endTurn": 45,
-        "count": 1
+        "count": 1,
+        "grade": 3
       }
     ],
     "gameId": 107601,
@@ -6882,7 +6897,8 @@
       {
         "startTurn": 24,
         "endTurn": 46,
-        "count": 3
+        "count": 3,
+        "grade": 3
       }
     ],
     "gameId": 108901,
@@ -6924,7 +6940,8 @@
       {
         "startTurn": 24,
         "endTurn": 46,
-        "count": 3
+        "count": 3,
+        "grade": 3
       }
     ],
     "gameId": 108902,
@@ -7078,7 +7095,7 @@
     ],
     "freeRaces": [],
     "gameId": 109201,
-    "name": "[まんなか◎スポットライト]烈焰快驹",
+    "name": "[最中央◎聚光灯]烈焰快驹",
     "preferRaces": [],
     "preferReds": [],
     "races": [
@@ -8623,7 +8640,7 @@
     ],
     "freeRaces": [],
     "gameId": 113301,
-    "name": "[陸離の編纂者]创世驹",
+    "name": "[陆离之编纂者]创世驹",
     "preferRaces": [],
     "preferReds": [],
     "races": [
@@ -8635,6 +8652,46 @@
       53,
       59,
       67,
+      71
+    ],
+    "star": 5
+  },
+  "113501": {
+    "bonusData": [],
+    "fiveStatusBonus": [
+      0,
+      10,
+      0,
+      20,
+      0
+    ],
+    "fiveStatusInitial": [
+      115,
+      106,
+      109,
+      115,
+      105
+    ],
+    "freeRaces": [
+      {
+        "startTurn": 12,
+        "endTurn": 28,
+        "count": 1
+      }
+    ],
+    "gameId": 113501,
+    "name": "[Sunlit Outsider]黄金旅程",
+    "preferRaces": [],
+    "preferReds": [],
+    "races": [
+      11,
+      30,
+      33,
+      44,
+      55,
+      59,
+      67,
+      69,
       71
     ],
     "star": 5

@@ -46,6 +46,12 @@ RaceConditionIds = {
     300: "G3"
 }
 
+RaceConditionGrades = {
+    700: 4,
+    100: 1,
+    300: 3
+}
+
 # 生涯比赛会改变的情况（能不比就不比）
 # 回合数已经-1了
 SpecialRaces = {
@@ -138,6 +144,10 @@ SpecialRaces = {
     1132: {
         "races": [31, 44],
         "note": "唯爱 - 选择三冠路线"
+    },
+    1135: {
+        "races": [44, 71],
+        "note": "黄金 - 选择菊花赏，有马纪念"
     }
 }
 
@@ -358,7 +368,8 @@ def parseUma():
                 freeRaces.append({
                     "startTurn": last_race,
                     "endTurn": race.turn-1,
-                    "count": count
+                    "count": count,
+                    "grade": RaceConditionGrades[race.condition_id]
                 })
             elif race.condition_type == 3:
                 # 粉丝数

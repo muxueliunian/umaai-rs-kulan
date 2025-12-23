@@ -97,7 +97,9 @@ pub struct Uma {
     /// Buff状态
     pub flags: UmaFlags,
     /// 生涯比赛bitset 低到高位对应11-71回合
-    pub career_races: u64
+    pub career_races: u64,
+    /// 比赛场次 bitset 对应11-71回合
+    pub win_races: u64
 }
 
 impl Uma {
@@ -150,10 +152,18 @@ impl Uma {
         if turn == 73 || turn == 75 || turn == 77 {
             true
         } else if turn < 11 || turn > 72 {
-            false 
+            false
         } else {
             (1u64 << (turn - 11)) & self.career_races != 0
         }
+    }
+
+    /// 设置第x回合为比赛状态，用于统计自选比赛
+    pub fn set_race(&mut self, turn: i32) {
+        if turn < 11 || turn > 72 {
+            return;
+        }
+        self.win_races |= 1u64 << (turn - 11);
     }
 
     /// 计算技能点和总Hint等级换算得到的总pt数，不包括已学习的技能

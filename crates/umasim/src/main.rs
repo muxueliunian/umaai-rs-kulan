@@ -30,7 +30,7 @@ fn run_onsen_once<T: Trainer<OnsenGame>>(
     trainer: &T, uma: u32, cards: &[u32; 6], inherit: InheritInfo, rng: &mut StdRng
 ) -> Result<SimulationResult> {
     let mut game = OnsenGame::newgame(uma, cards, inherit)?;
-   // println!("{game:#?}");
+    // println!("{game:#?}");
     game.run_full_game(trainer, rng)?;
     info!("育成结束！");
 

@@ -10,17 +10,21 @@
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use anyhow::Result;
+use colored::Colorize;
 use flexi_logger::LogSpecification;
 use log::{info, warn};
 use rand::prelude::StdRng;
-use colored::Colorize;
 
 use crate::{
-    game::{Trainer, onsen::{action::OnsenAction, game::OnsenGame}},
+    game::{
+        Trainer,
+        onsen::{action::OnsenAction, game::OnsenGame}
+    },
     gamedata::{ActionValue, GAMECONSTANTS, LOGGER},
     global,
     neural::{Evaluator, HandwrittenEvaluator},
-    search::{ActionResult, FlatSearch, SearchConfig, SearchOutput}, utils::format_luck
+    search::{ActionResult, FlatSearch, SearchConfig, SearchOutput},
+    utils::format_luck
 };
 
 /// MCTS 训练员
@@ -53,7 +57,7 @@ impl MctsTrainer {
             evaluator: HandwrittenEvaluator::new(),
             verbose: false,
             mcts_onsen: false,
-            last_game: None, 
+            last_game: None,
             last_score: (AtomicU64::new(0), AtomicU64::new(0)),
             initial_score: (AtomicU64::new(0), AtomicU64::new(0))
         }
@@ -79,8 +83,7 @@ impl MctsTrainer {
     pub fn is_same_game(&self, game: &OnsenGame) -> bool {
         if let Some(last) = &self.last_game {
             // 马娘ID相同且回合数相同或差1，则再检查卡组
-            if last.uma.uma_id == game.uma.uma_id &&
-                (last.turn == game.turn || last.turn + 1 == game.turn) {
+            if last.uma.uma_id == game.uma.uma_id && (last.turn == game.turn || last.turn + 1 == game.turn) {
                 for i in 0..6 {
                     if last.deck[i].card_id != game.deck[i].card_id {
                         return false;
@@ -92,7 +95,9 @@ impl MctsTrainer {
         false
     }
 
-    pub fn format_action_result(&self, action: &OnsenAction, result: &ActionResult, score: f64, best_score: f64) -> String {
+    pub fn format_action_result(
+        &self, action: &OnsenAction, result: &ActionResult, score: f64, best_score: f64
+    ) -> String {
         let text = format!("{action}: {score:.0}");
         let delta = best_score - score;
         if delta <= 0.0 {
@@ -106,7 +111,7 @@ impl MctsTrainer {
         }
     }
     // 计算本回合均分
-    fn update_score(&self, game: &OnsenGame, actions: &[OnsenAction], search_output: &SearchOutput) {    
+    fn update_score(&self, game: &OnsenGame, actions: &[OnsenAction], search_output: &SearchOutput) {
         let mut sum = 0.0;
         let mut mean_weighted = 0.0;
         let mut count = 0;
@@ -140,11 +145,13 @@ impl MctsTrainer {
         if self.verbose {
             // 输出搜索结果
             let mut line = vec![];
-            info!("[回合 {}] 均分 {}, 运气: {}(乐观 + {weighted_bonus:.0}), {}",
+            info!(
+                "[回合 {}] 均分 {}, 运气: {}(乐观 + {weighted_bonus:.0}), {}",
                 game.turn + 1,
                 format!("{turn_score:.0}").cyan(),
                 format_luck("本局", luck_overall),
-                format_luck("本回合", luck_turn));
+                format_luck("本回合", luck_turn)
+            );
             // 输出各动作的分数
             for (i, action) in search_output.actions.iter().enumerate() {
                 let result = &search_output.action_results[i];
@@ -161,7 +168,11 @@ impl MctsTrainer {
             }
             info!("[回合 {} 重视评分] {}", game.turn + 1, line.join(" "));
             if race_loss > 0.0 {
-                info!("[回合 {} 重视评分] 自选比赛损失 {}", game.turn + 1, format!("{race_loss:.0}").red());
+                info!(
+                    "[回合 {} 重视评分] 自选比赛损失 {}",
+                    game.turn + 1,
+                    format!("{race_loss:.0}").red()
+                );
             }
         }
 
@@ -173,12 +184,12 @@ impl MctsTrainer {
     }
 
     // 计算本回合PT加成均分
-    fn update_score_2(&self, game: &OnsenGame, actions: &[OnsenAction], search_output: &SearchOutput) {    
+    fn update_score_2(&self, game: &OnsenGame, actions: &[OnsenAction], search_output: &SearchOutput) {
         let mut sum = 0.0;
         let mut mean_weighted = 0.0;
         let mut count = 0;
         let best_action = search_output.best_action_2();
-        
+
         for r in &search_output.action_results {
             sum += r.1.sum;
             count += r.1.count();
@@ -226,7 +237,11 @@ impl MctsTrainer {
             }
             info!("[回合 {} 重视 PT ] {}", game.turn + 1, line.join(" "));
             if race_loss > 0.0 {
-                info!("[回合 {} 重视 PT ] 自选比赛损失 {}", game.turn + 1, format!("{race_loss:.0}").red());
+                info!(
+                    "[回合 {} 重视 PT ] 自选比赛损失 {}",
+                    game.turn + 1,
+                    format!("{race_loss:.0}").red()
+                );
             }
         }
 
@@ -262,11 +277,7 @@ impl Trainer<OnsenGame> for MctsTrainer {
             // mcts_onsen=false时 温泉选择使用手写逻辑（固定最优顺序）
             let idx = self.evaluator.select_onsen_index(game, actions);
             if self.verbose {
-                info!(
-                    "[回合 {}] 选择温泉（手写逻辑）: {}",
-                    game.turn+1,
-                    actions[idx]
-                );
+                info!("[回合 {}] 选择温泉（手写逻辑）: {}", game.turn + 1, actions[idx]);
             }
             return Ok(idx);
         }
@@ -292,12 +303,12 @@ impl Trainer<OnsenGame> for MctsTrainer {
             .push_temp_spec(LogSpecification::off());
 
         // 使用 MCTS 搜索
-        let search_output = self.search.search(game, actions, rng)?; 
+        let search_output = self.search.search(game, actions, rng)?;
         let best_action = search_output.best_action();
         let best_action_2 = search_output.best_action_2();
         global!(LOGGER).lock().expect("logger lock").pop_temp_spec();
         // 找到最优动作在原列表中的索引
-        //let idx = actions.iter().position(|a| a == best_action).unwrap_or(0);        
+        //let idx = actions.iter().position(|a| a == best_action).unwrap_or(0);
         let idx = actions.iter().position(|a| a == best_action_2).unwrap_or(0);
         self.update_score(game, actions, &search_output);
         self.update_score_2(game, actions, &search_output);

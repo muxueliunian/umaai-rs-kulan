@@ -95,7 +95,7 @@ impl GameStatus for GameStatusOnsen {
             // 调整回合状态到新回合开始(仅开局不用调)
             if base.turn != 2 {
                 base.turn += 1;
-                info!("调整为回合: {}", base.turn+1);
+                info!("调整为回合: {}", base.turn + 1);
             }
         } else if self.playing_state != 1 {
             warn!("未知回合状态: {}", self.playing_state);
@@ -149,7 +149,7 @@ impl GameStatus for GameStatusOnsen {
             bathing: BathingInfo::from(&self.onsen.bathing),
             onsen_state: self.onsen.onsen_state,
             dig_remain: self.onsen.dig_remain,
-            dig_count: self.onsen.dig_count + 1,    // 包含默认泉
+            dig_count: self.onsen.dig_count + 1, // 包含默认泉
             dig_power: self.onsen.dig_power,
             dig_level: self.onsen.dig_level,
             dig_vital_cost: self.onsen.dig_vital_cost,
