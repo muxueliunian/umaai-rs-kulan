@@ -285,7 +285,7 @@ async fn main() -> Result<()> {
                 }
                 "neuralnet" | "nn" => {
                     // 神经网络训练员
-                    let model_path = "saved_models/onsen_v1/model.onnx";
+                    let model_path = game_config.neuralnet_model_path.as_str();
                     match NeuralNetTrainer::load(model_path) {
                         Ok(trainer) => {
                             let trainer = trainer.verbose(simulation_count == 1);

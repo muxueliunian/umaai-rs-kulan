@@ -4,17 +4,24 @@
 //! 直接使用神经网络的 Policy 输出选择动作，不进行 MCTS 搜索。
 
 use anyhow::Result;
-use log::info;
+use log::{info, warn};
+use rand::Rng;
 use rand::rngs::StdRng;
+use rand_distr::{Distribution, weighted::WeightedIndex};
 
 use crate::{
     game::{
         Trainer,
         onsen::{action::OnsenAction, game::OnsenGame}
     },
-    gamedata::ActionValue,
-    neural::{Evaluator, NeuralNetEvaluator}
+    gamedata::{ActionValue, EventData},
+    neural::{Evaluator, HandwrittenEvaluator, NeuralNetEvaluator},
+    training_sample::{CHOICE_DIM, POLICY_DIM}
 };
+
+// Choice 相关常量（对齐 muxue）
+const CHOICE_OFFSET: usize = POLICY_DIM; // 50
+const DEFAULT_CHOICE_TEMPERATURE: f64 = 1.0;
 
 /// 神经网络训练员
 ///
@@ -79,12 +86,15 @@ impl Trainer<OnsenGame> for NeuralNetTrainer {
             anyhow::bail!("没有可选选项");
         }
 
-        // 使用神经网络的 Choice 输出选择
+        // 默认事件选项用 handwritten
+        //
+        // 注：如果直接用未充分训练的 choice head，事件选择会接近随机，明显拉低整局分数。
+        let evaluator = HandwrittenEvaluator::new();
         let mut best_idx = 0;
         let mut best_value = f64::NEG_INFINITY;
 
         for (idx, _) in choices.iter().enumerate() {
-            let value = self.evaluator.evaluate_choice(game, idx);
+            let value = evaluator.evaluate_choice(game, idx);
             if value > best_value {
                 best_value = value;
                 best_idx = idx;
@@ -96,5 +106,116 @@ impl Trainer<OnsenGame> for NeuralNetTrainer {
         }
 
         Ok(best_idx)
+    }
+
+    fn select_event_choice(
+        &self,
+        game: &OnsenGame,
+        event: &EventData,
+        choices: &[ActionValue],
+        rng: &mut StdRng
+    ) -> Result<usize> {
+        if choices.is_empty() {
+            return Ok(0);
+        }
+
+        // ===== Chance 事件：按 random_choice_prob 采样 =====
+        if let Some(probs) = &event.random_choice_prob {
+            if probs.len() != choices.len() {
+                warn!(
+                    "[Choice] 事件#{} {} random_choice_prob.len()={} != choices.len()={}，回退均匀随机",
+                    event.id,
+                    event.name,
+                    probs.len(),
+                    choices.len()
+                );
+                return Ok(rng.random_range(0..choices.len()));
+            }
+            match WeightedIndex::new(probs) {
+                Ok(weights) => return Ok(weights.sample(rng)),
+                Err(e) => {
+                    warn!(
+                        "[Choice] 事件#{} {} 权重非法（{}），回退均匀随机",
+                        event.id, event.name, e
+                    );
+                    return Ok(rng.random_range(0..choices.len()));
+                }
+            }
+        }
+
+        // ===== 决策事件 =====
+        let n = choices.len();
+
+        // 单选项直接返回
+        if n == 1 {
+            return Ok(0);
+        }
+
+        // 超过 8 个选项：回退 handwritten
+        if n > CHOICE_DIM {
+            if self.verbose {
+                warn!(
+                    "[Choice] 事件#{} {} choices.len()={} > {}，回退 handwritten",
+                    event.id, event.name, n, CHOICE_DIM
+                );
+            }
+            return self.select_choice(game, choices, rng);
+        }
+
+        // 提取特征并推理（需要把 pending_choices 喂进特征）
+        let features = game.extract_nn_features(Some(choices));
+        let output = match self.evaluator.infer(&features) {
+            Ok(o) => o,
+            Err(e) => {
+                warn!(
+                    "[Choice] 事件#{} {} 推理失败: {}，回退 handwritten",
+                    event.id, event.name, e
+                );
+                return self.select_choice(game, choices, rng);
+            }
+        };
+
+        // 提取 choice logits [CHOICE_OFFSET, CHOICE_OFFSET + n)
+        let logits: Vec<f64> = output[CHOICE_OFFSET..CHOICE_OFFSET + n].iter().map(|&x| x as f64).collect();
+
+        // Softmax 采样（带 temperature）
+        let temperature = DEFAULT_CHOICE_TEMPERATURE.max(0.01);
+        let max_logit = logits.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+
+        if !max_logit.is_finite() {
+            warn!("[Choice] 事件#{} {} logits 非有限值，回退均匀随机", event.id, event.name);
+            return Ok(rng.random_range(0..n));
+        }
+
+        let weights: Vec<f64> = logits.iter().map(|&logit| ((logit - max_logit) / temperature).exp()).collect();
+        let sum: f64 = weights.iter().sum();
+        if sum <= 0.0 || !sum.is_finite() {
+            warn!("[Choice] 事件#{} {} softmax sum 异常，回退均匀随机", event.id, event.name);
+            return Ok(rng.random_range(0..n));
+        }
+
+        match WeightedIndex::new(&weights) {
+            Ok(dist) => {
+                let selected = dist.sample(rng);
+                if self.verbose {
+                    info!(
+                        "[Choice] 事件#{} {}: choice_head selected={}, temperature={:.2}, logits={:?}",
+                        event.id,
+                        event.name,
+                        selected,
+                        temperature,
+                        logits
+                    );
+                }
+                Ok(selected)
+            }
+            Err(e) => {
+                warn!(
+                    "[Choice] 事件#{} {} WeightedIndex 失败: {}，回退均匀随机",
+                    event.id, event.name, e
+                );
+                Ok(rng.random_range(0..n))
+            }
+        }
     }
 }

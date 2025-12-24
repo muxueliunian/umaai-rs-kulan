@@ -3,13 +3,13 @@
 //! 使用 ONNX 模型进行策略和价值评估。
 //!
 //! # 输入输出维度
-//! - 输入：590 维特征向量
-//! - 输出：58 维 (Policy 50 + Choice 5 + Value 3)
+//! - 输入：1121 维特征向量 (Global 587 + Card 89*6)
+//! - 输出：61 维 (Policy 50 + Choice 8 + Value 3)
 //!
 //! # Value 反归一化
-//! - scoreMean = VALUE_MEAN + VALUE_SCALE * output[55]
-//! - scoreStdev = STDEV_SCALE * output[56]
-//! - value = VALUE_MEAN + VALUE_SCALE * output[57]
+//! - scoreMean = VALUE_MEAN + VALUE_SCALE * output[58]
+//! - scoreStdev = STDEV_SCALE * abs(output[59])
+//! - value = VALUE_MEAN + VALUE_SCALE * output[60]
 
 use std::sync::Arc;
 
@@ -28,16 +28,16 @@ use crate::game::{
 // ============================================================================
 
 /// 输入维度
-const INPUT_DIM: usize = 590;
+const INPUT_DIM: usize = 1121;
 
 /// 输出维度
-const OUTPUT_DIM: usize = 58;
+const OUTPUT_DIM: usize = 61;
 
 /// Policy 输出维度
 const POLICY_DIM: usize = 50;
 
 /// Choice 输出维度
-const CHOICE_DIM: usize = 5;
+const CHOICE_DIM: usize = 8;
 
 /// Value 反归一化参数 - 均值
 const VALUE_MEAN: f64 = 58000.0;
@@ -94,16 +94,16 @@ impl NeuralNetEvaluator {
     /// 执行神经网络推理
     ///
     /// # 参数
-    /// - `features`: 590 维输入特征
+    /// - `features`: 1121 维输入特征
     ///
     /// # 返回
-    /// 58 维输出向量
+    /// 61 维输出向量
     pub fn infer(&self, features: &[f32]) -> Result<Vec<f32>> {
         if features.len() != INPUT_DIM {
             anyhow::bail!("输入维度错误: 期望 {}, 实际 {}", INPUT_DIM, features.len());
         }
 
-        // 创建输入张量 [1, 590]
+        // 创建输入张量 [1, 1121]
         let input =
             tract_ndarray::Array2::from_shape_vec((1, INPUT_DIM), features.to_vec()).context("创建输入张量失败")?;
 
@@ -136,47 +136,55 @@ impl NeuralNetEvaluator {
     fn extract_value(&self, output: &[f32]) -> ValueOutput {
         let score_mean = VALUE_MEAN + VALUE_SCALE * output[POLICY_DIM + CHOICE_DIM] as f64;
         let score_stdev = STDEV_SCALE * output[POLICY_DIM + CHOICE_DIM + 1] as f64;
-        // output[57] 是 value，但我们使用 score_mean 作为主要评估值
+        // output[POLICY_DIM + CHOICE_DIM + 2] 是 value，但我们使用 score_mean 作为主要评估值
         ValueOutput::new(score_mean, score_stdev.abs())
     }
 
-    /// 根据 Policy 概率分布采样选择动作索引
-    fn sample_action_index(&self, policy: &[f32], legal_mask: &[bool], rng: &mut StdRng) -> usize {
-        // 应用合法动作掩码并归一化
-        let mut probs: Vec<f64> = policy
-            .iter()
-            .enumerate()
-            .map(|(i, &p)| {
-                if i < legal_mask.len() && legal_mask[i] {
-                    p.max(0.0) as f64
-                } else {
-                    0.0
-                }
-            })
-            .collect();
+    /// 根据 Policy logits 采样选择动作索引
+    ///
+    /// 注意：神经网络输出的是 logits（可为负数），不能直接当作概率使用。
+    /// 这里对合法动作做 softmax，再按概率采样。
+    fn sample_action_index(&self, logits: &[f32], legal_mask: &[bool], rng: &mut StdRng) -> usize {
+        // 找到合法动作中最大的 logit（softmax 数值稳定）
+        let mut max_logit = f32::NEG_INFINITY;
+        for (i, &v) in logits.iter().enumerate() {
+            if i < legal_mask.len() && legal_mask[i] && v > max_logit {
+                max_logit = v;
+            }
+        }
 
-        let sum: f64 = probs.iter().sum();
-        if sum <= 0.0 {
-            // 如果没有合法动作，返回第一个合法的
+        // 没有任何合法动作，回退到第一个合法动作
+        if !max_logit.is_finite() {
             return legal_mask.iter().position(|&x| x).unwrap_or(0);
         }
 
-        // 归一化
-        for p in &mut probs {
-            *p /= sum;
+        // 计算 softmax 权重（只对合法动作赋值）
+        let mut weights: Vec<f64> = vec![0.0; logits.len()];
+        let mut sum: f64 = 0.0;
+        for (i, &v) in logits.iter().enumerate() {
+            if i < legal_mask.len() && legal_mask[i] {
+                let w = ((v - max_logit) as f64).exp();
+                weights[i] = w;
+                sum += w;
+            }
         }
 
-        // 采样
-        let r: f64 = rng.random();
-        let mut cumsum = 0.0;
-        for (i, &p) in probs.iter().enumerate() {
-            cumsum += p;
-            if r < cumsum {
+        if sum <= 0.0 || !sum.is_finite() {
+            // 数值异常时回退到最后一个合法动作（保持确定性）
+            return legal_mask.iter().rposition(|&x| x).unwrap_or(0);
+        }
+
+        // 采样：在 [0, sum) 上采样，再落到累计权重区间
+        let r: f64 = rng.random::<f64>() * sum;
+        let mut acc = 0.0;
+        for (i, &w) in weights.iter().enumerate() {
+            acc += w;
+            if r <= acc {
                 return i;
             }
         }
 
-        // 返回最后一个合法动作
+        // 理论上不会走到这里，兜底返回最后一个合法动作
         legal_mask.iter().rposition(|&x| x).unwrap_or(0)
     }
 

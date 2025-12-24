@@ -9,45 +9,73 @@ use anyhow::Result;
 /// 用于收集和导出训练数据
 use serde::{Deserialize, Serialize};
 
+// ============================================================================
+// 神经网络输入输出维度常量
+// ============================================================================
+
+/// 神经网络输入维度
+pub const NN_INPUT_DIM: usize = 1121;
+
+/// 全局特征维度
+pub const NN_GLOBAL_DIM: usize = 587;
+
+/// 支援卡特征维度（每张卡）
+pub const NN_CARD_DIM: usize = 89;
+
+/// 支援卡数量
+pub const NN_CARD_NUM: usize = 6;
+
+/// 神经网络输出维度
+pub const NN_OUTPUT_DIM: usize = 61;
+
+/// Policy 输出维度
+pub const POLICY_DIM: usize = 50;
+
+/// Choice 输出维度
+pub const CHOICE_DIM: usize = 8;
+
+/// Value 输出维度
+pub const VALUE_DIM: usize = 3;
+
 /// 训练样本结构
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TrainingSample {
-    /// 神经网络输入特征（590 维）
+    /// 神经网络输入特征（1121 维）
     ///
     /// 维度分布：
-    /// - 全局信息（410 维）
+    /// - 全局信息（587 维）
     ///   - 搜索参数（6 维）
     ///   - 回合信息（78 维）
     ///   - 马娘属性（15 维）
     ///   - 体力与干劲（5 维）
     ///   - 训练数值（30 维）
     ///   - 失败率（5 维）
-    ///   - 温泉剧本特定（140 维）- 支持温泉选择学习
+    ///   - 温泉剧本特定（140 维）
     ///   - 其他信息（61 维）
-    ///   - 事件选项特征（70 维）
-    /// - 支援卡信息（30 维 × 6 张 = 180 维）
+    ///   - 事件选项特征（113 维 = 1 + 8*14）
+    ///   - 动作合法掩码（50 维）
+    ///   - 比赛回合标记（78 维）
+    ///   - 预留（6 维）
+    /// - 支援卡信息（89 维 × 6 张 = 534 维）
     pub nn_input: Vec<f32>,
 
     /// Policy 目标（50 维动作概率分布）
     pub policy_target: Vec<f32>,
 
-    /// Choice 目标（5 维事件选项概率分布）
+    /// Choice 目标（8 维事件选项概率分布）
     pub choice_target: Vec<f32>,
 
     /// Value 目标（3 维：scoreMean, scoreStdev, value）
     pub value_target: Vec<f32>
 }
 
-/// 神经网络输入维度常量
-pub const NN_INPUT_DIM: usize = 590;
-
 impl TrainingSample {
     /// 创建新的训练样本
     pub fn new(nn_input: Vec<f32>, policy_target: Vec<f32>, choice_target: Vec<f32>, value_target: Vec<f32>) -> Self {
         assert_eq!(nn_input.len(), NN_INPUT_DIM, "nn_input 必须是 {} 维", NN_INPUT_DIM);
-        assert_eq!(policy_target.len(), 50, "policy_target 必须是 50 维");
-        assert_eq!(choice_target.len(), 5, "choice_target 必须是 5 维");
-        assert_eq!(value_target.len(), 3, "value_target 必须是 3 维");
+        assert_eq!(policy_target.len(), POLICY_DIM, "policy_target 必须是 {} 维", POLICY_DIM);
+        assert_eq!(choice_target.len(), CHOICE_DIM, "choice_target 必须是 {} 维", CHOICE_DIM);
+        assert_eq!(value_target.len(), VALUE_DIM, "value_target 必须是 {} 维", VALUE_DIM);
 
         Self {
             nn_input,
@@ -59,7 +87,17 @@ impl TrainingSample {
 
     /// 创建空的 choice_target（无事件选项时使用）
     pub fn empty_choice_target() -> Vec<f32> {
-        vec![0.0; 5]
+        vec![0.0; CHOICE_DIM]
+    }
+
+    /// 创建空的 policy_target（无动作选择时使用）
+    pub fn empty_policy_target() -> Vec<f32> {
+        vec![0.0; POLICY_DIM]
+    }
+
+    /// 创建空的 value_target（待填充）
+    pub fn empty_value_target() -> Vec<f32> {
+        vec![0.0; VALUE_DIM]
     }
 }
 

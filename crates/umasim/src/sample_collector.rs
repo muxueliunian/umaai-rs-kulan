@@ -4,7 +4,7 @@
 /// 每回合记录游戏状态、选择的动作、事件选项等信息
 /// 游戏结束后根据最终分数生成训练样本
 use crate::game::onsen::action::OnsenAction;
-use crate::training_sample::{NN_INPUT_DIM, TrainingSample};
+use crate::training_sample::{CHOICE_DIM, NN_INPUT_DIM, TrainingSample};
 
 /// Policy 输出维度
 pub const POLICY_DIM: usize = 50;
@@ -44,7 +44,7 @@ pub fn action_to_global_index(action: &OnsenAction) -> Option<usize> {
 /// 单回合数据
 #[derive(Debug, Clone)]
 pub struct TurnData {
-    /// 590 维特征向量
+    /// 1121 维特征向量
     pub features: Vec<f32>,
     /// 选择的动作的**全局索引**（使用 action_to_global_index 转换）
     pub global_action_idx: usize,
@@ -81,7 +81,7 @@ impl SampleCollector {
     /// 记录一个回合的动作选择
     ///
     /// # 参数
-    /// - `features`: 当前游戏状态的特征向量（590 维）
+    /// - `features`: 当前游戏状态的特征向量（1121 维）
     /// - `action`: 选择的动作
     pub fn record_turn(&mut self, features: Vec<f32>, action: &OnsenAction) {
         debug_assert_eq!(features.len(), NN_INPUT_DIM, "特征维度必须是 {}", NN_INPUT_DIM);
@@ -157,9 +157,9 @@ impl SampleCollector {
                 }
 
                 // Choice target: one-hot 编码选择的事件选项
-                let mut choice_target = vec![0.0_f32; 5];
+                let mut choice_target = vec![0.0_f32; CHOICE_DIM];
                 if let Some(idx) = turn.choice_idx {
-                    if idx < 5 {
+                    if idx < CHOICE_DIM {
                         choice_target[idx] = 1.0;
                     }
                 }
@@ -167,9 +167,9 @@ impl SampleCollector {
                 // Value target: [scoreMean, scoreStdev, value]
                 // 使用最终分数作为均值，固定标准差 500
                 let value_target = vec![
-                    final_score / 1000.0, // 归一化分数
-                    0.5,                  // 标准差 (500 / 1000)
-                    final_score / 1000.0, // 价值
+                    final_score, // mean: 绝对分数
+                    500.0,       // stdev: 固定 500（绝对分数）
+                    final_score, // value: 绝对分数
                 ];
 
                 TrainingSample::new(turn.features, policy_target, choice_target, value_target)

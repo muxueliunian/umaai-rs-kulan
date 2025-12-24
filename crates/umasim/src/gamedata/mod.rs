@@ -541,6 +541,9 @@ pub struct GameConfig {
     /// 训练员类型: "manual" | "random" | "handwritten" | "collector" | "neuralnet" | "mcts"
     #[serde(default = "default_trainer")]
     pub trainer: String,
+    /// neuralnet ONNX 模型路径（仅 trainer="neuralnet" / "nn" 生效）
+    #[serde(default = "default_neuralnet_model_path")]
+    pub neuralnet_model_path: String,
     /// 模拟次数（默认1次，设置大于1可多次模拟并统计）
     #[serde(default = "default_simulation_count")]
     pub simulation_count: usize,
@@ -574,6 +577,11 @@ fn default_log_level() -> String {
 
 fn default_trainer() -> String {
     "manual".to_string()
+}
+
+fn default_neuralnet_model_path() -> String {
+    // 默认路径
+    "saved_models/onsen_v4/model.onnx".to_string()
 }
 
 fn default_simulation_count() -> usize {

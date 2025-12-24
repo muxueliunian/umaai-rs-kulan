@@ -8,7 +8,7 @@ use super::SearchConfig;
 use crate::{
     game::onsen::{action::OnsenAction, game::OnsenGame},
     sample_collector::action_to_global_index,
-    training_sample::TrainingSample
+    training_sample::{CHOICE_DIM, TrainingSample}
 };
 
 /// 最大分数（用于分布直方图）
@@ -269,16 +269,16 @@ impl SearchOutput {
         // 2. Value Target: 最优动作的搜索结果
         let best = self.best_result();
         let value_target = vec![
-            (best.mean() / 1000.0) as f32,                             // 归一化均值
-            (best.stdev() / 150.0) as f32,                             // 归一化标准差
-            (best.weighted_mean(self.radical_factor) / 1000.0) as f32, // 归一化加权值
+            best.mean() as f32,
+            best.stdev() as f32,
+            best.weighted_mean(self.radical_factor) as f32,
         ];
 
         // 3. Policy Target: softmax(各动作 weighted)
         let policy_target = self.calc_policy_target(config.policy_delta);
 
-        // 4. Choice Target: 暂时为空
-        let choice_target = vec![0.0_f32; 5];
+        // 4. Choice Target: 暂时为空（8 维）
+        let choice_target = vec![0.0_f32; CHOICE_DIM];
 
         TrainingSample::new(features, policy_target, choice_target, value_target)
     }
