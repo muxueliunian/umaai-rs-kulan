@@ -908,14 +908,14 @@ impl OnsenGame {
         }
     }
 
-    /// 提取神经网络输入特征（500 维）
+    /// 提取神经网络输入特征（1121 维）
     ///
     /// # 参数
     /// - `pending_choices`: 可选的事件选项列表（用于提取事件选项特征）
     ///
     /// # 返回
-    /// 590 维 f32 向量：
-    /// - 全局信息（410 维）
+    /// 1121 维 f32 向量：
+    /// - 全局信息（587 维）
     ///   - 搜索参数（6 维）
     ///   - 回合信息（78 维）
     ///   - 马娘属性（15 维）
@@ -924,13 +924,18 @@ impl OnsenGame {
     ///   - 失败率（5 维）
     ///   - **温泉剧本特定（140 维）** - 支持温泉选择学习
     ///   - 其他信息（61 维）
-    ///   - 事件选项特征（70 维）
-    /// - 支援卡信息（30 维 × 6 张 = 180 维）
+    ///   - 事件选项特征（113 维 = 1 + 8*14）
+    ///   - 动作合法掩码（50 维）
+    ///   - 比赛回合标记（78 维）
+    ///   - 预留（6 维）
+    /// - 支援卡信息（89 维 × 6 张 = 534 维）
     pub fn extract_nn_features(&self, pending_choices: Option<&[ActionValue]>) -> Vec<f32> {
-        let mut features = vec![0.0_f32; 590];
+        use crate::training_sample::{CHOICE_DIM, NN_CARD_DIM, NN_INPUT_DIM, POLICY_DIM};
+
+        let mut features = vec![0.0_f32; NN_INPUT_DIM];
         let mut idx = 0;
 
-        // ========== 全局信息（320 维） ==========
+        // ========== 全局信息（587 维） ==========
 
         // 1. 搜索参数（6 维）- 预留，当前填充 0
         idx += 6;
@@ -1135,11 +1140,11 @@ impl OnsenGame {
         // 预留 (7-60)
         idx += 61;
 
-        // 9. 事件选项特征（70 维）
+        // 9. 事件选项特征（113 维 = 1 + 8*14）
         if let Some(choices) = pending_choices {
-            features[idx] = choices.len() as f32 / 5.0;
+            features[idx] = choices.len() as f32 / CHOICE_DIM as f32;
 
-            for (i, choice) in choices.iter().take(5).enumerate() {
+            for (i, choice) in choices.iter().take(CHOICE_DIM).enumerate() {
                 let base = idx + 1 + i * 14;
 
                 // 五维属性收益
@@ -1167,39 +1172,137 @@ impl OnsenGame {
                 features[base + 13] = 0.0;
             }
         }
-        idx += 70;
+        idx += 1 + CHOICE_DIM * 14; // 113 维
 
-        // ========== 支援卡信息（30 维 × 6 张 = 180 维） ==========
+        // 10. 动作合法掩码（50 维）
+        // 标记当前可选的动作
+        if let Ok(actions) = self.list_actions() {
+            for action in &actions {
+                if let Some(action_idx) = crate::sample_collector::action_to_global_index(action) {
+                    if action_idx < POLICY_DIM {
+                        features[idx + action_idx] = 1.0;
+                    }
+                }
+            }
+        }
+        idx += POLICY_DIM; // 50 维
+
+        // 11. 比赛回合标记（78 维）
+        // 标记所有比赛回合
+        for turn in 0..78 {
+            if self.uma.is_race_turn(turn as i32) {
+                features[idx + turn] = 1.0;
+            }
+        }
+        idx += 78;
+
+        // 12. 预留（6 维）
+        idx += 6;
+
+        // ========== 支援卡信息（89 维 × 6 张 = 534 维） ==========
+        // 布局（对齐 C++ getCardParamNNInputV1）：
+        // - Person 信息（12 维）
+        // - Card 参数（77 维）
 
         for card_idx in 0..6 {
-            let base = idx + card_idx * 30;
+            let base = idx + card_idx * NN_CARD_DIM;
 
             if let Some(person) = self.persons.get(card_idx) {
-                // 羁绊状态（10 维）
+                // ===== Person 信息（12 维） =====
+
+                // 羁绊状态（6 维）
                 features[base] = person.friendship as f32 / 100.0;
                 features[base + 1] = if person.friendship >= 60 { 1.0 } else { 0.0 };
                 features[base + 2] = if person.friendship >= 80 { 1.0 } else { 0.0 };
                 features[base + 3] = if person.friendship >= 100 { 1.0 } else { 0.0 };
                 features[base + 4] = if person.is_hint { 1.0 } else { 0.0 };
-                features[base + 5] = if self.is_shining_at(card_idx, 0) { 1.0 } else { 0.0 }; // 简化：只检查速度训练
-                // 6-9: 预留
+                // 是否发光（检查当前回合是否有金技能闪光）
+                let is_shining = (0..5).any(|train| self.is_shining_at(card_idx, train));
+                features[base + 5] = if is_shining { 1.0 } else { 0.0 };
 
                 // 位置信息（5 维）- 在哪个训练
                 for train in 0..5 {
                     if self.distribution()[train].contains(&(card_idx as i32)) {
-                        features[base + 10 + train] = 1.0;
+                        features[base + 6 + train] = 1.0;
                     }
                 }
 
-                // 卡片参数（15 维）- 简化处理
-                if let Some(card) = self.deck.get(card_idx) {
-                    // 卡片类型 One-Hot（6 维：速耐力根智友人）
-                    let card_type = card.data.card_type as usize;
-                    if card_type < 6 {
-                        features[base + 15 + card_type] = 1.0;
-                    }
-                    // 21-29: 预留（友情加成、干劲加成等）
+                // 预留（1 维）
+                // features[base + 11] = 0.0;
+            }
+
+            // ===== Card 参数（77 维，从 base+12 开始） =====
+            let card_base = base + 12;
+
+            if let Some(card) = self.deck.get(card_idx) {
+                let data = &card.data;
+                let effect = &card.effect;
+
+                // 卡片类型 One-Hot（7 维：0-4 对应速耐力根智，5=友人，6=其他）
+                let card_type = data.card_type.min(6) as usize;
+                if card_type < 7 {
+                    features[card_base + card_type] = 1.0;
                 }
+
+                // 计算后的属性加成（5 维）- 使用 CardTrainingEffect
+                features[card_base + 7] = effect.youqing / 100.0; // 友情加成
+                features[card_base + 8] = effect.ganjing as f32 / 100.0; // 干劲加成
+                features[card_base + 9] = effect.xunlian as f32 / 100.0; // 训练加成
+                features[card_base + 10] = effect.wiz_vital_bonus as f32 / 100.0; // 智力体力恢复
+                features[card_base + 11] = effect.deyilv / 100.0; // 得意率
+
+                // Hint 相关（2 维）- 从 card_value 取基础值
+                if let Some(cv) = data.card_value.first() {
+                    features[card_base + 12] = cv.hint_level as f32 / 5.0;
+                    features[card_base + 13] = cv.hint_prob_increase as f32 / 100.0;
+                }
+
+                // 失败率/体力消耗下降（2 维）
+                features[card_base + 14] = effect.fail_rate_drop / 100.0;
+                features[card_base + 15] = effect.vital_cost_drop / 100.0;
+
+                // 副属性加成（6 维）
+                for i in 0..6 {
+                    features[card_base + 16 + i] = effect.bonus[i] as f32 / 10.0;
+                }
+
+                // 固有效果类型 One-Hot（35 维）- 简化处理
+                // 使用 unique_effect_type 字段
+                let unique_type = data.unique_effect_type as usize;
+                if unique_type > 0 && unique_type < 35 {
+                    features[card_base + 22 + unique_type] = 1.0;
+                }
+                // 22-56: 35 种固有效果类型
+
+                // 固有效果数值（最多 5 维）
+                for (i, &param) in data.unique_effect_param.iter().take(5).enumerate() {
+                    features[card_base + 57 + i] = param as f32 / 100.0;
+                }
+                // 57-61: 固有效果参数
+
+                // 稀有度和突破等级（2 维）
+                features[card_base + 62] = data.rarity as f32 / 3.0;
+                features[card_base + 63] = card.rank as f32 / 4.0;
+
+                // 五维属性得意类型（5 维）
+                for i in 0..5 {
+                    if data.card_type == i {
+                        features[card_base + 64 + i as usize] = 1.0;
+                    }
+                }
+
+                // 是否友人卡（1 维）
+                features[card_base + 69] = if data.card_type == 5 { 1.0 } else { 0.0 };
+
+                // 事件效果提高（2 维）
+                features[card_base + 70] = effect.event_effect_up as f32 / 100.0;
+                features[card_base + 71] = effect.event_recovery_amount_up as f32 / 100.0;
+
+                // 赛后加成（1 维）
+                features[card_base + 72] = effect.saihou as f32 / 100.0;
+
+                // 预留（4 维）
+                // features[card_base + 73..77] 预留
             }
         }
 
@@ -1691,3 +1794,4 @@ impl Game for OnsenGame {
         Ok(())
     }
 }
+
