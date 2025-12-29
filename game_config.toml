@@ -92,11 +92,6 @@ rollout_batch_size = 64
 # leaf eval 评估器（handwritten/nn）
 rollout_evaluator = "nn"
 
-# rollout 动作策略（handwritten/nn_greedy/nn_sample）
-# 注意：当前阶段仅动作走 NN，事件选项仍走手写
-#(⚠️⚠️⚠️严肃警告！当前action不能走nn速度极慢！！！)
-rollout_policy = "handwritten"
-
 # ---- mean-filter 数据收集（generate_mean_filtered_data）----
 # 说明：
 # - 该段仅供 `cargo run -p umasim --release --bin generate_mean_filtered_data` 使用

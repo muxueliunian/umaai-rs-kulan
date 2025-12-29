@@ -12,7 +12,7 @@ mcts_selected_onsen = true
 mcts_selection = "score"
 
 # 蒙特卡洛配置（umaai 实时推荐使用）
-mcts = { search_n = 1024, search_group_size = 64, max_depth = 32, rollout_evaluator = "handwritten", rollout_batch_size = 32, radical_factor_max = 1.5, rollout_policy = "handwritten" }
+mcts = { search_n = 1024, search_group_size = 64, max_depth = 32, rollout_evaluator = "handwritten", rollout_batch_size = 32, radical_factor_max = 1.5 }
 
 # 训练员类型:
 #   "manual"      - 手动选择（交互式，不支持多次模拟）
