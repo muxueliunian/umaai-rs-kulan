@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 umasim.workspace = true
+umaai.workspace = true
 anyhow.workspace = true
 bincode.workspace = true
 chrono.workspace = true

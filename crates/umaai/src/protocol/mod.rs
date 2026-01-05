@@ -4,7 +4,7 @@ use anyhow::Result;
 use log::warn;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use umasim::{
-    game::{BaseGame, FriendOutState, FriendState, InheritInfo, SupportCard, TurnStage, Uma, UmaFlags},
+    game::{BaseGame, BasePerson, FriendOutState, FriendState, InheritInfo, SupportCard, TurnStage, Uma, UmaFlags},
     gamedata::{GAMEDATA, GameConfig},
     global,
     utils::Array5
@@ -114,6 +114,7 @@ pub struct GameStatusBase {
     #[serde(rename = "playing_state")]
     pub playing_state: i32,
     /// 胜场信息
+    #[serde(default)]
     pub race_history: Vec<i32>
 }
 
@@ -223,5 +224,67 @@ impl GameStatusBase {
             card_type_count: Arc::new(card_type_count),
             ..Default::default()
         })
+    }
+}
+
+impl From<&BasePerson> for BasePersonStatus {
+    fn from(person: &BasePerson) -> Self {
+        Self {
+            person_type: 0, // 没使用这个字段
+            chara_id: person.chara_id,
+            friendship: person.friendship,
+            is_hint: person.is_hint
+        }
+    }
+}
+
+/// 反向转回GameStatusBase, persons和friend_没有设置
+impl From<&BaseGame> for GameStatusBase {
+    fn from(game: &BaseGame) -> Self {
+        let failure_rate_bias = if game.uma.flags.good_trainer {
+            2
+        } else if game.uma.flags.bad_trainer {
+            -2
+        } else {
+            0
+        };
+        let card_id = game.deck.iter().map(|sc| sc.card_id * 10 + sc.rank).collect();
+        let friend_outgoing_used = game.friend.out_used.iter().filter(|x| **x).count() as i32;
+
+        GameStatusBase {
+            scenario_id: 0,
+            uma_id: game.uma.uma_id,
+            uma_star: 5,
+            turn: game.turn,
+            vital: game.uma.vital,
+            max_vital: game.uma.max_vital,
+            motivation: game.uma.motivation,
+            five_status: game.uma.five_status.clone(),
+            five_status_limit: game.uma.five_status_limit.clone(),
+            skill_pt: game.uma.skill_pt,
+            skill_score: game.uma.skill_score,
+            total_hints: game.uma.total_hints,
+            train_level_count: game.train_level_count.clone(),
+            pt_score_rate: 2.0,
+            failure_rate_bias,
+            is_ill: game.uma.flags.ill,
+            is_qiezhe: game.uma.flags.qiezhe,
+            is_aijiao: game.uma.flags.aijiao,
+            is_positive_thinking: game.uma.flags.positive_thinking,
+            is_refresh_mind: game.uma.flags.refresh_mind > 0,
+            is_lucky: game.uma.flags.lucky,
+            zhongma_blue_count: game.inherit.blue_count.clone(),
+            is_racing: game.uma.is_race_turn(game.turn),
+            card_id,
+            persons: vec![],
+            person_distribution: game.distribution.clone(),
+            locked_training_id: -1,
+            friendship_noncard_reporter: 0,
+            friendship_noncard_yayoi: 0,
+            friend_stage: game.friend.out_state.to_int(),
+            friend_outgoing_used,
+            playing_state: 1,
+            race_history: game.uma.list_races()
+        }
     }
 }

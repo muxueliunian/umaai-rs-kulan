@@ -13,7 +13,7 @@ use umasim::{
     global
 };
 
-use crate::protocol::{GameStatus, GameStatusBase};
+use crate::protocol::{BasePersonStatus, GameStatus, GameStatusBase};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -30,6 +30,16 @@ impl From<&BathingStatus> for BathingInfo {
             buff_remain_turn: status.buff_remain_turn,
             is_super: false,
             is_super_ready: status.is_super_ready
+        }
+    }
+}
+
+impl From<&BathingInfo> for BathingStatus {
+    fn from(info: &BathingInfo) -> Self {
+        BathingStatus {
+            ticket_num: info.ticket_num,
+            buff_remain_turn: info.buff_remain_turn,
+            is_super_ready: info.is_super_ready
         }
     }
 }
@@ -163,4 +173,33 @@ impl GameStatus for GameStatusOnsen {
         ret.update_scenario_buff(true);
         Ok(ret)
     }
+}
+
+/// 反向转回OnsenGameStatus?
+impl From<&OnsenGame> for GameStatusOnsen {
+    fn from(game: &OnsenGame) -> Self {
+        let mut base = GameStatusBase::from(&game.base);
+        // 补充人头信息
+        base.persons = game.persons.iter().map(BasePersonStatus::from).collect();
+        base.friendship_noncard_yayoi = game.persons[6].friendship;
+        base.friendship_noncard_reporter = game.persons[7].friendship;
+        let onsen = OnsenStatus {
+            current_onsen: game.current_onsen,
+            bathing: BathingStatus::from(&game.bathing),
+            onsen_state: game.onsen_state.clone(),
+            dig_remain: game.dig_remain.clone(),
+            dig_count: game.dig_count,
+            dig_power: game.dig_power.clone(),
+            dig_level: game.dig_level.clone(),
+            dig_vital_cost: game.dig_vital_cost,
+            pending_selection: game.pending_selection
+        };
+        GameStatusOnsen { base_game: base, onsen }
+    }
+}
+
+/// 保存当前 OnsenGame 状态为 thisTurn.json 格式的字符串
+pub fn serialize_game(game: &OnsenGame) -> Result<String> {
+    let status = GameStatusOnsen::from(game);
+    Ok(serde_json::to_string_pretty(&status)?)
 }

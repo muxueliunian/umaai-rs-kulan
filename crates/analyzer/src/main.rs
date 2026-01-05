@@ -3,8 +3,10 @@
 //! author: curran
 
 use anyhow::Result;
-use log::info;
+use inquire::Select;
+use log::{info, warn};
 use rand::{SeedableRng, rngs::StdRng};
+use umaai::protocol::{GameStatus, GameStatusOnsen, onsen::serialize_game};
 use umasim::{
     game::{Game, InheritInfo, onsen::game::OnsenGame},
     gamedata::{GAMECONSTANTS, GameConfig, init_global},
@@ -13,7 +15,6 @@ use umasim::{
     trainer::*,
     utils::init_logger
 };
-
 /// 单次模拟结果
 struct SimulationResult {
     score: i32,
@@ -23,20 +24,44 @@ struct SimulationResult {
 
 /// 运行 OnsenGame（单次），返回模拟结果
 fn run_onsen_once(
-    trainer_mcts: MctsTrainer, uma: u32, cards: &[u32; 6], inherit: InheritInfo
+    trainer_mcts: MctsTrainer, uma: u32, cards: &[u32; 6], inherit: InheritInfo, load_game: Option<OnsenGame>
 ) -> Result<SimulationResult> {
     let trainer_hand = HandwrittenTrainer::new().verbose(true);
     let mut rng = StdRng::from_os_rng();
-
-    let mut game = OnsenGame::newgame(uma, cards, inherit)?;
+    if let Some(g) = &load_game {
+        info!("---- 载入游戏状态 ----");
+        println!("{}", g.explain_distribution()?);
+        info!("---------------------");
+    }
+    let mut game = load_game.unwrap_or(OnsenGame::newgame(uma, cards, inherit)?);
     // 使用2个trainer完成一局游戏
-    game.run_stage(&trainer_mcts, &mut rng)?;
-    while game.next() {
+    loop {
+        let game_for_save = game.clone();
+        let mut selected = false; // 表示这阶段是否有选择
         if game.pending_selection || !game.list_actions().unwrap_or_default().is_empty() {
             let mut game2 = game.clone();
             game2.run_stage(&trainer_hand, &mut rng)?;
+            selected = true;
         }
         game.run_stage(&trainer_mcts, &mut rng)?;
+        if selected {
+            let select = Select::new("选择一个选项", vec!["继续", "保存本回合", "退出"]).prompt()?;
+            match select {
+                "保存本回合" => {
+                    let path = format!("logs/turn{}.json", game_for_save.turn);
+                    let json = serialize_game(&game)?;
+                    fs_err::write(&path, &json)?;
+                    warn!("已保存到 {path}");
+                }
+                "退出" => {
+                    break;
+                }
+                _ => {}
+            }
+        }
+        if !game.next() {
+            break;
+        }
     }
     game.on_simulation_end(&trainer_mcts, &mut rng)?;
 
@@ -61,6 +86,14 @@ async fn main() -> Result<()> {
     // 3. 再初始化全局数据
     init_global()?;
 
+    // 如果指定了文件名，则载入游戏
+    let mut load_game = None;
+    if let Some(filename) = std::env::args().nth(1) {
+        info!("载入 {filename} ...");
+        let contents = fs_err::read_to_string(&filename)?;
+        let status: GameStatusOnsen = serde_json::from_str(&contents)?;
+        load_game = Some(status.into_game()?);
+    }
     //let simulation_count = game_config.simulation_count.max(1);
     //let simulation_count = 1;
     // 开始计时
@@ -82,9 +115,11 @@ async fn main() -> Result<()> {
         .with_search_cpuct(game_config.mcts.search_cpuct)
         .with_expected_search_stdev(game_config.mcts.expected_search_stdev);
     info!("search_config = {search_config:?}");
-    let trainer_mcts = MctsTrainer::new(search_config).verbose(true);
+    let mut trainer_mcts = MctsTrainer::new(search_config).verbose(true);
+    trainer_mcts.mcts_onsen = game_config.mcts_selected_onsen;
+    trainer_mcts.mcts_selection = game_config.mcts_selection.clone();
 
-    let sim_result = run_onsen_once(trainer_mcts, game_config.uma, &game_config.cards, inherit)?;
+    let sim_result = run_onsen_once(trainer_mcts, game_config.uma, &game_config.cards, inherit, load_game)?;
 
     println!("{}", sim_result.explain);
     println!(

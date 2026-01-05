@@ -104,6 +104,15 @@ impl FriendOutState {
             Self::Away => "离开".to_string()
         }
     }
+
+    pub fn to_int(&self) -> i32 {
+        match self {
+            Self::UnClicked => 0,
+            Self::BeforeUnlock => 1,
+            Self::AfterUnlock => 2,
+            Self::Away => 3
+        }
+    }
 }
 
 /// 友人出行信息，剧本通用

@@ -227,6 +227,17 @@ impl Uma {
             None
         }
     }
+
+    /// 从bitmap转为比赛回合Vec
+    pub fn list_races(&self) -> Vec<i32> {
+        let mut ret = vec![];
+        for bit in 0..63 {
+            if self.win_races & (1 << bit) != 0 {
+                ret.push(bit + 11);
+            }
+        }
+        ret
+    }
 }
 
 #[cfg(test)]
@@ -242,6 +253,17 @@ mod tests {
 
         let uma = Uma::new(101901)?;
         println!("{}", uma.explain()?);
+        Ok(())
+    }
+
+    #[test]
+    fn test_win_races() -> Result<()> {
+        init_logger("test", "info")?;
+        init_global()?;
+
+        let mut uma = Uma::new(101901)?;
+        uma.win_races = 0b110000_000000_1;
+        println!("{:?}", uma.list_races());
         Ok(())
     }
 }
