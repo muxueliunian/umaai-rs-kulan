@@ -218,8 +218,10 @@ impl SearchOutput {
             .iter()
             .enumerate()
             .max_by(|(_, a), (_, b)| {
-                let wa = a.0.weighted_mean(radical_factor);
-                let wb = b.0.weighted_mean(radical_factor);
+                //let wa = a.0.weighted_mean(radical_factor);
+                //let wb = b.0.weighted_mean(radical_factor);
+                let wa = a.0.mean();
+                let wb = b.0.mean();
                 wa.partial_cmp(&wb).unwrap_or(std::cmp::Ordering::Equal)
             })
             .map(|(i, _)| i)

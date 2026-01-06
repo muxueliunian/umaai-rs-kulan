@@ -196,7 +196,8 @@ impl Uma {
             }*/
             score += cons.five_status_final_score[status];
         }
-        score
+        // 乘一个系数与原本评分数量级接近
+        ((score as f64) * 0.45) as i32
     }
 
     pub fn add_value(&mut self, action: &ActionValue) -> &mut Self {
