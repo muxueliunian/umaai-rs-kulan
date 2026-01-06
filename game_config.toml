@@ -69,7 +69,7 @@ neuralnet_model_path = "saved_models/onsen_v18/model.onnx"
 [mcts]
 # 每个动作的搜索次数（默认 12288；太慢可选 8192/4096）
 search_n = 12288
-# UCB 每组搜索次数（不动）
+# UCB 每组搜索次数（调小会更频繁的尝试剪枝，但对评分接近的选项的算力会下降）
 search_group_size = 2048
 
 # 最大搜索深度（0=搜到游戏结束；>0=截断后用 leaf eval 估值）
@@ -84,7 +84,7 @@ policy_delta = 100.0
 # UCB 搜索分配
 use_ucb = true
 search_cpuct = 1.0
-# 取1.65倍标准差 4500 * 1.65
+# 取1.65倍标准差 4500 * 1.65，对评分接近的选项保留更多算力
 expected_search_stdev = 7500.0
 
 # leaf eval 微批大小（仅 max_depth>0 && rollout_evaluator="nn" 时生效）
